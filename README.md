@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="brand/logo.png" alt="Blink Live Events camera logo" width="160">
-</p>
-
-<h1 align="center">Blink Live Events</h1>
+<h1 align="center"><img src="brand/readme-header.png" alt="Blink Live Events" width="720"></h1>
 
 Receive Blink doorbell presses and camera motion in Home Assistant over Blink's cloud push channel. Events are forwarded as soon as Blink sends them, so automations do not wait for the polling cycle used by Home Assistant's [official Blink integration](https://www.home-assistant.io/integrations/blink/) or for a clip to finish. A Home Assistant custom integration exposes native event entities and a general event-bus event, so you can decide what automations or integrations to build.
 
