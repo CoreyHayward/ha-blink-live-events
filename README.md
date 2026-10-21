@@ -6,15 +6,15 @@ This is a community reverse-engineered project, not an official Blink, Amazon, G
 
 ## Devices tested
 
-End-to-end push reception and Home Assistant delivery were verified for the doorbell and two cameras below. The `mini/owl` device was present in the test setup, but no end-to-end result was recorded for it.
+End-to-end push reception and Home Assistant delivery were verified for the Blink Video Doorbell and two Blink Outdoor 3 cameras below. A Blink Mini Pan-Tilt Camera was present in the test setup, but no end-to-end result was recorded for it.
 
-| Device | Blink-reported model | Events observed |
+| Product | Blink-reported model | Events observed |
 | --- | --- | --- |
-| Doorbell | `lotus` | Button press (`button_press`) and PIR motion (`category=media`, `event_type=pir`) |
-| Camera (two units) | `catalina` | Motion on both units (`category=motion`, `event_type=cam2sm_motion`) |
-| Camera | `mini/owl` | No result recorded |
+| Blink Video Doorbell | `lotus` | Button press (`button_press`) and PIR motion (`category=media`, `event_type=pir`) |
+| Blink Outdoor 3 (two units) | `catalina` | Motion on both units (`category=motion`, `event_type=cam2sm_motion`) |
+| Blink Mini Pan-Tilt Camera (OWL) | `mini/owl` | No result recorded |
 
-These identifiers come from Blink's app protocol and may not match the product names shown in the Blink app. Testing covers this hardware and app setup; it does not confirm compatibility with every Blink camera or doorbell model.
+The model identifiers come from Blink's app protocol. Testing covers this hardware and app setup; it does not confirm compatibility with every Blink camera or doorbell model.
 
 ## What you get
 
@@ -201,6 +201,10 @@ Run the HA integration tests in a separate Python 3.14 environment because Home 
 python -m pip install -r requirements_test.txt
 pytest -q
 ```
+
+## Support
+
+If Blink Live Events is useful to you, [buy me a coffee](https://buymeacoffee.com/coreyhayward).
 
 ## License
 
