@@ -4,6 +4,18 @@ Receive Blink doorbell presses and camera motion in Home Assistant over Blink's 
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
+## Devices tested
+
+End-to-end push reception and Home Assistant delivery were verified for the doorbell and two cameras below. The `mini/owl` device was present in the test setup, but no end-to-end result was recorded for it.
+
+| Device | Blink-reported model | Events observed |
+| --- | --- | --- |
+| Doorbell | `lotus` | Button press (`button_press`) and PIR motion (`category=media`, `event_type=pir`) |
+| Camera (two units) | `catalina` | Motion on both units (`category=motion`, `event_type=cam2sm_motion`) |
+| Camera | `mini/owl` | No result recorded |
+
+These identifiers come from Blink's app protocol and may not match the product names shown in the Blink app. Testing covers this hardware and app setup; it does not confirm compatibility with every Blink camera or doorbell model.
+
 ## What you get
 
 - `event.blink_live_events_doorbell` for doorbell presses.

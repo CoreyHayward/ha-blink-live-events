@@ -14,7 +14,7 @@ The historical [BlinkPy discussion #770](https://github.com/fronzbot/blinkpy/dis
 
 ## Validation summary
 
-Real physical doorbell presses and motion-only activity from a doorbell and standalone cameras were matched to direct FCM pushes. Doorbell motion arrived as `category=media,event_type=pir`; standalone-camera motion arrived as `category=motion,event_type=cam2sm_motion`. The doorbell press and standalone-camera motion messages were forwarded to HA and observed by HA automations. The initial receiver did not forward the doorbell PIR messages until their classification was added. This established that the event path works without polling a camera media list or waiting for a clip.
+Real physical doorbell presses and motion-only activity were matched to direct FCM pushes on one doorbell reporting model `lotus` and two cameras reporting model `catalina`. Doorbell motion arrived as `category=media,event_type=pir`; motion from both standalone cameras arrived as `category=motion,event_type=cam2sm_motion`. Doorbell presses and camera motion were forwarded to HA and observed by HA automations. A camera reporting model `mini/owl` was present in the test setup but was not exercised end to end. The initial receiver did not forward the doorbell PIR messages until their classification was added. This established that the event path works without polling a camera media list or waiting for a clip.
 
 Validation is evidence for the tested Blink app/backend version, not a guarantee of permanent compatibility. FCM token renewal and re-association after token rotation remain manual. The production receiver should be monitored and revalidated after Blink Android app updates.
 
