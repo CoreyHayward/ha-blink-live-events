@@ -42,6 +42,37 @@ flowchart LR
 
 The receiver holds its own FCM identity and Blink client session. Home Assistant never receives Blink account credentials. The receiver forwards only the event metadata needed for automations; private FCM IDs, Blink account IDs, transaction IDs, and raw push payloads stay in the receiver's private data volume.
 
+## Quickstart
+
+You need Home Assistant 2026.10.0 or newer, plus a Linux host with Docker Compose v2 and outbound internet access. The receiver can run on a separate host from Home Assistant.
+
+1. **Install the Home Assistant integration.** Once this repository is public, add it to HACS as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. While it is private, use the manual install steps below; cloning in the next step requires GitHub access. Add the integration, open **Configure → View receiver URL**, and copy the private URL.
+
+2. **Prepare the receiver.** On your Linux Docker host, download the repo and create its private environment file:
+
+   ```sh
+   git clone --depth 1 https://github.com/CoreyHayward/ha-blink-live-events.git
+   cd ha-blink-live-events
+   cp .env.example .env
+   chmod 600 .env
+   ```
+
+   Put the copied URL in `.env` as `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL`.
+
+3. **Register Blink and start listening.** Run these commands from the repository directory:
+
+   ```sh
+   docker compose -f receiver/compose.yaml pull
+   docker compose -f receiver/compose.yaml run --rm blink-live-events register-fcm
+   docker compose -f receiver/compose.yaml run --rm -it blink-live-events register-blink
+   docker compose -f receiver/compose.yaml up -d
+   docker compose -f receiver/compose.yaml logs -f blink-live-events
+   ```
+
+   `register-blink` opens a Blink-hosted sign-in flow. Complete sign-in and verification in your browser, then paste the full callback URL into the hidden terminal prompt. The receiver never sees your password or verification code. Test with one doorbell press and one separate motion event.
+
+See [Installation](#installation) for manual integration setup, troubleshooting, and security details.
+
 ## Installation
 
 The custom integration requires Home Assistant 2026.10.0 or newer.
