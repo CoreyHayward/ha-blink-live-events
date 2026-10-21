@@ -1,4 +1,4 @@
-# Example based on the repository maintainer's Home Assistant setup.
+# Example from my Home Assistant setup.
 # Replace the entity IDs and camera names if your setup differs.
 #
 # The snapshot refresh button asks Blink for a new picture. This wakes the
@@ -9,7 +9,7 @@
 - id: blink_live_events_snapshot_notifications
   alias: Blink Live Events - notify with a fresh snapshot
   description: >-
-    Send doorbell and motion events with a fresh camera snapshot to both phones.
+    Send doorbell and motion events with a fresh camera snapshot to my phone.
   triggers:
     - trigger: event
       event_type: blink_live_events_event
@@ -34,20 +34,13 @@
         classification: camera_motion
         camera_name: Garden Cam
       id: garden_cam
-    - trigger: event
-      event_type: blink_live_events_event
-      event_data:
-        classification: camera_motion
-        camera_name: Murphy Cam
-      id: murphy_cam
   variables:
     camera_entity: >-
       {% set cameras = {
         'doorbell_press': 'camera.blink_proxy_doorbell',
         'doorbell_motion': 'camera.blink_proxy_doorbell',
         'driveway': 'camera.blink_proxy_driveway',
-        'garden_cam': 'camera.blink_proxy_garden_cam',
-        'murphy_cam': 'camera.blink_proxy_murphy_cam'
+        'garden_cam': 'camera.blink_proxy_garden_cam'
       } %}
       {{ cameras[trigger.id] }}
     refresh_button: >-
@@ -55,8 +48,7 @@
         'doorbell_press': 'button.blink_proxy_doorbell_refresh_snapshot',
         'doorbell_motion': 'button.blink_proxy_doorbell_refresh_snapshot',
         'driveway': 'button.blink_proxy_driveway_refresh_snapshot',
-        'garden_cam': 'button.blink_proxy_garden_cam_refresh_snapshot',
-        'murphy_cam': 'button.blink_proxy_murphy_cam_refresh_snapshot'
+        'garden_cam': 'button.blink_proxy_garden_cam_refresh_snapshot'
       } %}
       {{ buttons[trigger.id] }}
     notification_title: >-
@@ -77,15 +69,8 @@
         entity_id: "{{ camera_entity }}"
       data:
         filename: "/media/blink_live_events_{{ trigger.event.data.event_id }}.jpg"
-    - alias: Notify Corey's phone
+    - alias: Notify my phone
       action: notify.mobile_app_corey_s_phone
-      data:
-        title: "{{ notification_title }}"
-        message: "{{ notification_message }}"
-        data:
-          image: "/media/local/blink_live_events_{{ trigger.event.data.event_id }}.jpg"
-    - alias: Notify Lottie's phone
-      action: notify.mobile_app_lotties_phone
       data:
         title: "{{ notification_title }}"
         message: "{{ notification_message }}"
