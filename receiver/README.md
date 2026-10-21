@@ -59,6 +59,8 @@ docker compose -f receiver/compose.yaml logs -f blink-push-receiver
 
 `FCM transport connected; waiting for Blink pushes` confirms that Google transport connected. Validate that the separate Blink association is accepted by generating one doorbell press and one motion-only event. A push must arrive from the cloud connection; successful registration alone is not event validation.
 
+Blink doorbell motion currently arrives as `event_type=pir` under `category=media`; the receiver classifies it as camera motion. Other motion events use `cloud_motion` or `cam2sm_motion`.
+
 ## Configuration and privacy
 
 - The bundled Firebase file contains public client identifiers only. The ignored `.env` may contain replacement values; keep it out of commits.

@@ -91,7 +91,7 @@ The image is `ghcr.io/coreyhayward/blink-push-receiver`. Once public, it can be 
 
 ## Home Assistant event contract
 
-The integration fires `blink_push_receiver_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Its `event_data` fields are:
+The integration fires `blink_push_receiver_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Its `event_data` fields are:
 
 | Field | Meaning |
 | --- | --- |
@@ -100,7 +100,7 @@ The integration fires `blink_push_receiver_event` once for every accepted push. 
 | `event_id` | Stable SHA-256 delivery key used by the receiver to suppress duplicate delivery. |
 | `classification` | `doorbell_press` or `camera_motion`. |
 | `category` | Blink's notification category when present (`media` or `motion`). |
-| `event_type` | Blink's event type, such as `button_press` or `cam2sm_motion`. |
+| `event_type` | Blink's event type, such as `button_press`, `cam2sm_motion`, or doorbell motion's `pir`. |
 | `ha_event_type` | HA semantic type: `ring` for a doorbell or `motion` for a camera. |
 | `camera_name` | Blink camera name for motion events, when included by Blink. |
 | `provider_timestamp` | Provider send time in UTC, when present. |
@@ -128,6 +128,17 @@ actions:
 ```
 
 For a doorbell, set `classification: doorbell_press`. Or automate from the native event entities by selecting one as an event trigger in the HA automation editor. An optional starting point is [`examples/automation-event-bus.yaml`](examples/automation-event-bus.yaml); the integration does not install it.
+
+To target one camera, add its exact Blink name as `camera_name` in the event filter. For example, replace `Camera 1` below with the name in your Blink app:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: blink_push_receiver_event
+    event_data:
+      classification: camera_motion
+      camera_name: "Camera 1"
+```
 
 ## Security and limitations
 

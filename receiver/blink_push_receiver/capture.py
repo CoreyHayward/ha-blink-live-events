@@ -14,7 +14,7 @@ from .state import atomic_json, ensure_private_dir, read_json
 
 
 EVENTS_NAME = "messages.ndjson"
-MOTION_TYPES = {"cloud_motion", "cam2sm_motion"}
+MOTION_TYPES = {"cloud_motion", "cam2sm_motion", "pir"}
 
 
 def utc_now() -> str:
@@ -59,7 +59,10 @@ def classify(payload: dict[str, Any]) -> str:
     event_type = str(payload.get("event_type", "")).lower()
     if category == "media" and event_type == "button_press":
         return "doorbell_press"
-    if category == "motion" and event_type in MOTION_TYPES:
+    # Blink doorbells report PIR motion under category=media, while other
+    # motion messages use category=motion. The event type identifies PIR as
+    # movement even when Blink's notification category is misleading.
+    if event_type in MOTION_TYPES and (category == "motion" or event_type == "pir"):
         return "camera_motion"
     return "unclassified"
 

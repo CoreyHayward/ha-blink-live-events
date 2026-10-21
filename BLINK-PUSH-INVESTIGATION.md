@@ -6,7 +6,7 @@ This document records protocol findings used by the receiver. Blink may change t
 
 - The Blink Android app uses Firebase Cloud Messaging (FCM) and a separate Blink client association request. A public FCM sender ID alone is insufficient to register a receiver.
 - Blink associates the FCM registration with a client through its client update API, which includes a notification key. The receiver uses a separate Blink client ID and session; it does not reuse an existing BlinkPy, Home Assistant, or live-view proxy session.
-- Current Android app notification handling maps `category=media,event_type=button_press` to a doorbell press. It maps `category=motion,event_type=cloud_motion` or `cam2sm_motion` to motion.
+- Current Android app notification handling maps `category=media,event_type=button_press` to a doorbell press. It reports doorbell PIR movement as `category=media,event_type=pir`; the receiver classifies that as motion. Other motion events use `category=motion,event_type=cloud_motion` or `cam2sm_motion`.
 - Blink may request a notification receipt. When the associated transaction and tier fields are present, the receiver sends the requested acknowledgement.
 - Pushes are received over Google's Mobile Connection Server (MCS) transport. The receiver responds to server heartbeats, saves messages before acknowledging the stream, and resumes using recent persistent IDs.
 
@@ -14,7 +14,7 @@ The historical [BlinkPy discussion #770](https://github.com/fronzbot/blinkpy/dis
 
 ## Validation summary
 
-Real physical doorbell presses and separate camera motion-only activity were matched to direct FCM pushes. Doorbell and motion messages were acknowledged when requested, forwarded to HA, and observed by HA automations. This established that the event path works without polling a camera media list or waiting for a clip.
+Real physical doorbell presses and motion-only activity from a doorbell and standalone cameras were matched to direct FCM pushes. Doorbell motion arrived as `category=media,event_type=pir`; standalone-camera motion arrived as `category=motion,event_type=cam2sm_motion`. The doorbell press and standalone-camera motion messages were forwarded to HA and observed by HA automations. The initial receiver did not forward the doorbell PIR messages until their classification was added. This established that the event path works without polling a camera media list or waiting for a clip.
 
 Validation is evidence for the tested Blink app/backend version, not a guarantee of permanent compatibility. FCM token renewal and re-association after token rotation remain manual. The production receiver should be monitored and revalidated after Blink Android app updates.
 

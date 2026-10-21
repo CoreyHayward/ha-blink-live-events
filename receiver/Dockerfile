@@ -15,9 +15,10 @@ RUN groupadd --gid ${BLINK_PUSH_GID} blinkpush \
     && useradd --uid ${BLINK_PUSH_UID} --gid ${BLINK_PUSH_GID} --no-create-home --shell /usr/sbin/nologin blinkpush \
     && mkdir -p /data \
     && chown ${BLINK_PUSH_UID}:${BLINK_PUSH_GID} /data
+COPY receiver/requirements.txt /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir -r /tmp/requirements.txt
 COPY receiver /opt/receiver
-RUN chmod -R a+rX /opt/receiver \
-    && python -m pip install --no-cache-dir -r /opt/receiver/requirements.txt
+RUN chmod -R a+rX /opt/receiver
 
 USER ${BLINK_PUSH_UID}:${BLINK_PUSH_GID}
 ENTRYPOINT ["python", "-m", "receiver.blink_push_receiver"]
