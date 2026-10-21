@@ -1,11 +1,11 @@
 # Example from my Home Assistant setup.
 # Replace the entity IDs and camera names if your setup differs.
 #
-# The snapshot refresh button asks Blink for a new picture. This wakes the
-# camera and uses battery power. Home Assistant then saves the returned image
-# before sending the notifications. Unique files avoid two events overwriting
-# an image while a phone is downloading it; periodically remove old files from
-# the Home Assistant media folder.
+# Send the text alert immediately, then replace it with the same notification
+# plus a fresh snapshot once Blink has returned the image. The refresh button
+# wakes the camera and uses battery power. Unique tags and files keep separate
+# events from overwriting each other; periodically remove old files from the
+# Home Assistant media folder.
 - id: blink_live_events_snapshot_notifications
   alias: Blink Live Events - notify with a fresh snapshot
   description: >-
@@ -59,6 +59,13 @@
          if trigger.event.data.classification == 'doorbell_press'
          else trigger.event.data.camera_name ~ ' detected motion.' }}
   actions:
+    - alias: Send the immediate text notification
+      action: notify.mobile_app_corey_s_phone
+      data:
+        title: "{{ notification_title }}"
+        message: "{{ notification_message }}"
+        data:
+          tag: "blink_live_events_{{ trigger.event.data.event_id }}"
     - alias: Ask Blink for a fresh snapshot
       action: button.press
       target:
@@ -69,11 +76,12 @@
         entity_id: "{{ camera_entity }}"
       data:
         filename: "/media/blink_live_events_{{ trigger.event.data.event_id }}.jpg"
-    - alias: Notify my phone
+    - alias: Add the fresh snapshot to the existing notification
       action: notify.mobile_app_corey_s_phone
       data:
         title: "{{ notification_title }}"
         message: "{{ notification_message }}"
         data:
+          tag: "blink_live_events_{{ trigger.event.data.event_id }}"
           image: "/media/local/blink_live_events_{{ trigger.event.data.event_id }}.jpg"
-  mode: queued
+  mode: parallel
