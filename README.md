@@ -204,7 +204,7 @@ pytest -q
 
 ## Support
 
-If Blink Live Events is useful to you, [buy me a coffee](https://buymeacoffee.com/coreyhayward).
+If Blink Live Events is useful to you, [support the project on PayPal](https://paypal.me/coreyhayward).
 
 ## License
 
