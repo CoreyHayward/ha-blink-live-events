@@ -1,5 +1,5 @@
 {
-  "domain": "blink_push_receiver",
+  "domain": "blink_live_events",
   "name": "Blink Live Events",
   "codeowners": ["@CoreyHayward"],
   "config_flow": true,

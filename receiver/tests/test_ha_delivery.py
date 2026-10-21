@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from receiver.blink_push_receiver.ha_delivery import (
+from receiver.blink_live_events.ha_delivery import (
     HomeAssistantWebhook,
     build_ha_event,
     deliver_pending_once,

@@ -7,10 +7,10 @@ from homeassistant.core import Event
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.blink_push_receiver.const import DOMAIN, EVENT_TYPE
-from receiver.blink_push_receiver.ha_delivery import build_ha_event
+from custom_components.blink_live_events.const import DOMAIN, EVENT_TYPE
+from receiver.blink_live_events.ha_delivery import build_ha_event
 
-WEBHOOK_ID = "blink-push-receiver-test-secret"
+WEBHOOK_ID = "blink-live-events-test-secret"
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ async def test_webhook_publishes_sanitized_event_and_updates_entities(
         f"/api/webhook/{WEBHOOK_ID}",
         json={
             "schema_version": 1,
-            "source": "blink_push_receiver",
+            "source": "blink_live_events",
             "event_id": "safe-event-hash",
             "classification": "doorbell_press",
             "category": "media",

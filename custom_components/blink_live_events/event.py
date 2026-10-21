@@ -34,7 +34,7 @@ def _entity_event_attributes(data: dict[str, Any]) -> dict[str, Any]:
     return attributes
 
 
-class BlinkPushEvent(EventEntity):
+class BlinkLiveEvent(EventEntity):
     """Base event entity that listens for one receiver classification."""
 
     _classification: str
@@ -72,7 +72,7 @@ class BlinkPushEvent(EventEntity):
         self.async_write_ha_state()
 
 
-class BlinkDoorbellEvent(BlinkPushEvent):
+class BlinkDoorbellEvent(BlinkLiveEvent):
     """Doorbell presses from Blink doorbells."""
 
     _attr_device_class = EventDeviceClass.DOORBELL
@@ -82,7 +82,7 @@ class BlinkDoorbellEvent(BlinkPushEvent):
     _ha_event_type = DoorbellEventType.RING
 
 
-class BlinkMotionEvent(BlinkPushEvent):
+class BlinkMotionEvent(BlinkLiveEvent):
     """Motion events from Blink cameras."""
 
     _attr_device_class = EventDeviceClass.MOTION

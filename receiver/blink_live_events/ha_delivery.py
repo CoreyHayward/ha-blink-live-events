@@ -42,7 +42,7 @@ def build_ha_event(record: dict[str, Any]) -> dict[str, Any]:
     payload = record.get("payload") or {}
     return {
         "schema_version": 1,
-        "source": "blink_push_receiver",
+        "source": "blink_live_events",
         "event_id": delivery_key(record),
         "classification": record.get("classification"),
         "category": payload.get("category"),
@@ -191,4 +191,4 @@ def run_delivery_worker(
 
 
 def webhook_url_from_environment() -> str:
-    return os.environ.get("BLINK_PUSH_HA_WEBHOOK_URL", "").strip()
+    return os.environ.get("BLINK_LIVE_EVENTS_HA_WEBHOOK_URL", "").strip()

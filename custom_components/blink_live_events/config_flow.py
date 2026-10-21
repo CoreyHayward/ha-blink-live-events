@@ -13,7 +13,7 @@ from homeassistant.helpers.network import NoURLAvailableError
 from .const import DOMAIN
 
 
-class BlinkPushReceiverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class BlinkLiveEventsConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Set up a private webhook for a standalone receiver."""
 
     VERSION = 1
@@ -35,12 +35,12 @@ class BlinkPushReceiverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         _config_entry: config_entries.ConfigEntry,
-    ) -> BlinkPushReceiverOptionsFlow:
+    ) -> BlinkLiveEventsOptionsFlow:
         """Return the options flow."""
-        return BlinkPushReceiverOptionsFlow()
+        return BlinkLiveEventsOptionsFlow()
 
 
-class BlinkPushReceiverOptionsFlow(config_entries.OptionsFlow):
+class BlinkLiveEventsOptionsFlow(config_entries.OptionsFlow):
     """Show the webhook URL or rotate its secret identifier."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> Any:

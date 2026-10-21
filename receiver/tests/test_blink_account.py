@@ -11,8 +11,8 @@ from unittest.mock import Mock
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlencode, urlsplit
 
-import receiver.blink_push_receiver.blink_account as blink_account
-from receiver.blink_push_receiver.blink_account import (
+import receiver.blink_live_events.blink_account as blink_account
+from receiver.blink_live_events.blink_account import (
     BlinkAccountError,
     OAUTH_REDIRECT_URI,
     _authorization_url,
@@ -21,7 +21,7 @@ from receiver.blink_push_receiver.blink_account import (
     _oauth_token,
     associate_fcm_token,
 )
-from receiver.blink_push_receiver.state import read_json
+from receiver.blink_live_events.state import read_json
 
 
 class HostedOAuthTests(unittest.TestCase):
@@ -124,7 +124,7 @@ class HostedOAuthTests(unittest.TestCase):
                 "expires_at": 0,
             }
             with patch(
-                "receiver.blink_push_receiver.blink_account._request",
+                "receiver.blink_live_events.blink_account._request",
                 return_value=(200, {}, token_response),
             ) as request:
                 refreshed = _oauth_token(state, data_dir)

@@ -6,9 +6,9 @@ This is a community reverse-engineered project, not an official Blink, Amazon, G
 
 ## What you get
 
-- `event.blink_push_receiver_doorbell` for doorbell presses.
-- `event.blink_push_receiver_camera_motion` for camera motion.
-- The `blink_push_receiver_event` HA event with a sanitized, documented event payload.
+- `event.blink_live_events_doorbell` for doorbell presses.
+- `event.blink_live_events_camera_motion` for camera motion.
+- The `blink_live_events_event` HA event with a sanitized, documented event payload.
 - A private, local-only HA webhook endpoint generated during integration setup.
 - A standalone Docker Compose receiver for Linux hosts, including ARM64 systems such as Raspberry Pi.
 
@@ -30,9 +30,32 @@ The receiver holds its own FCM identity and Blink client session. Home Assistant
 
 The custom integration requires Home Assistant 2026.10.0 or newer.
 
+### Replacing the private test setup
+
+This pre-release rename changes the Home Assistant integration domain and event names, receiver environment variables, Compose service, and data volume. The old setup will not migrate automatically. Stop the old receiver before starting the new one, remove the old integration entry and `custom_components/blink_push_receiver` folder from Home Assistant, then install `custom_components/blink_live_events` and add **Blink Live Events** again. Copy the new receiver URL into `.env` as `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL`.
+
+Update automations that use the previous names:
+
+| Previous value | New value |
+| --- | --- |
+| Integration domain `blink_push_receiver` | `blink_live_events` |
+| `blink_push_receiver_event` | `blink_live_events_event` |
+| `event.blink_push_receiver_doorbell` | `event.blink_live_events_doorbell` |
+| `event.blink_push_receiver_camera_motion` | `event.blink_live_events_camera_motion` |
+| Event payload source `blink_push_receiver` | `blink_live_events` |
+| `BLINK_PUSH_HA_WEBHOOK_URL` | `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` |
+| `BLINK_PUSH_IMAGE_TAG` | `BLINK_LIVE_EVENTS_IMAGE_TAG` |
+| `BLINK_PUSH_FIREBASE_*` settings | `BLINK_LIVE_EVENTS_FIREBASE_*` settings |
+| `BLINK_PUSH_DATA_DIR` | `BLINK_LIVE_EVENTS_DATA_DIR` |
+| Compose service `blink-push-receiver` | Compose service `blink-live-events` |
+| Image `ghcr.io/coreyhayward/blink-push-receiver` | Image `ghcr.io/coreyhayward/ha-blink-live-events` |
+| Docker volume `receiver_blink-push-data` | Docker volume `receiver_blink-live-events-data` |
+
+The new Compose setup uses a separate data volume, so register its FCM identity and Blink client again. The previous receiver volume remains on disk until you remove it yourself.
+
 ### 1. Install the Home Assistant integration
 
-Once this repository is public, add it in HACS as a custom **Integration** repository, then install **Blink Live Events** and restart Home Assistant. HACS requires a public GitHub repository. While this repository is private, install manually: copy `custom_components/blink_push_receiver` into `<config>/custom_components/` and restart HA.
+Once this repository is public, add it in HACS as a custom **Integration** repository, then install **Blink Live Events** and restart Home Assistant. HACS requires a public GitHub repository. While this repository is private, install manually: copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
 
 In **Settings → Devices & services → Add integration**, add **Blink Live Events**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
 
@@ -55,7 +78,7 @@ The receiver image includes the minimal Firebase client configuration currently 
 
 ### 3. Register Blink and start listening
 
-Set `BLINK_PUSH_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest`; set `BLINK_PUSH_IMAGE_TAG` to a release such as `v1.0.0` to pin a version. Pull the image for your host architecture:
+Set `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest`; set `BLINK_LIVE_EVENTS_IMAGE_TAG` to a release such as `v1.0.0` to pin a version. Pull the image for your host architecture:
 
 ```sh
 docker compose -f receiver/compose.yaml pull
@@ -65,9 +88,9 @@ Create the independent FCM identity and associate it with Blink:
 
 ```sh
 docker compose -f receiver/compose.yaml run --rm \
-  blink-push-receiver register-fcm
+  blink-live-events register-fcm
 
-docker compose -f receiver/compose.yaml run --rm -it blink-push-receiver register-blink
+docker compose -f receiver/compose.yaml run --rm -it blink-live-events register-blink
 ```
 
 `register-blink` prints a Blink-hosted sign-in URL. Sign in and complete verification in your browser, then paste the full callback URL into the hidden terminal prompt. Your password and verification code are entered only on Blink's page.
@@ -76,7 +99,7 @@ Start the service and follow its logs:
 
 ```sh
 docker compose -f receiver/compose.yaml up -d
-docker compose -f receiver/compose.yaml logs -f blink-push-receiver
+docker compose -f receiver/compose.yaml logs -f blink-live-events
 ```
 
 The listener waits for real Blink pushes. Test one doorbell press and a separate motion-only event to validate your own registration. A connected FCM transport alone does not prove Blink has associated the token.
@@ -87,16 +110,16 @@ See [receiver/README.md](receiver/README.md) for registration details, security,
 
 After the repository is public, the **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. Publishing is gated while the repository is private. Run the Validate workflow manually on `main` once after making the repository public; later pushes and version tags publish automatically.
 
-The image is `ghcr.io/coreyhayward/ha-blink-live-events`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_PUSH_IMAGE_TAG=local` in `.env`.
+The image is `ghcr.io/coreyhayward/ha-blink-live-events`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 
-The integration fires `blink_push_receiver_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Its `event_data` fields are:
+The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Its `event_data` fields are:
 
 | Field | Meaning |
 | --- | --- |
 | `schema_version` | Integer event contract version, initially `1`. |
-| `source` | Always `blink_push_receiver`. |
+| `source` | Always `blink_live_events`. |
 | `event_id` | Stable SHA-256 delivery key used by the receiver to suppress duplicate delivery. |
 | `classification` | `doorbell_press` or `camera_motion`. |
 | `category` | Blink's notification category when present (`media` or `motion`). |
@@ -116,7 +139,7 @@ One option is to listen to the integration event directly:
 ```yaml
 triggers:
   - trigger: event
-    event_type: blink_push_receiver_event
+    event_type: blink_live_events_event
     event_data:
       classification: camera_motion
 conditions: []
@@ -134,7 +157,7 @@ To target one camera, add its exact Blink name as `camera_name` in the event fil
 ```yaml
 triggers:
   - trigger: event
-    event_type: blink_push_receiver_event
+    event_type: blink_live_events_event
     event_data:
       classification: camera_motion
       camera_name: "Camera 1"
@@ -149,7 +172,7 @@ triggers:
 - Blink's app registration and OAuth flow may change. The receiver currently follows the Blink Android 60.0 protocol and needs revalidation after app updates.
 - This project receives doorbell and motion events only. It does not provide camera streams or clips; use a separate camera/live-view integration for those.
 
-Protocol notes and validation scope are documented in [BLINK-PUSH-INVESTIGATION.md](BLINK-PUSH-INVESTIGATION.md).
+Protocol notes and validation scope are documented in [BLINK-LIVE-EVENTS-INVESTIGATION.md](BLINK-LIVE-EVENTS-INVESTIGATION.md).
 
 ## Development and validation
 

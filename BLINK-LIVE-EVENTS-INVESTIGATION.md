@@ -1,4 +1,4 @@
-# Blink push protocol notes
+# Blink Live Events protocol notes
 
 This document records protocol findings used by the receiver. Blink may change the Android app and backend at any time. The integration is community-maintained and is not affiliated with Blink, Amazon, Google, or Home Assistant.
 

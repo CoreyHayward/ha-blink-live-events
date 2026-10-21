@@ -12,11 +12,11 @@ from .summarize import summarize
 
 
 def _default_data_dir() -> Path:
-    return Path(os.environ.get("BLINK_PUSH_DATA_DIR", "/data"))
+    return Path(os.environ.get("BLINK_LIVE_EVENTS_DATA_DIR", "/data"))
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Isolated Blink Android FCM push receiver")
+    parser = argparse.ArgumentParser(description="Blink Live Events Android FCM listener")
     parser.add_argument(
         "--data-dir",
         type=Path,
@@ -63,7 +63,7 @@ def main() -> int:
             return 0
         return 2
     except BlinkAccountError as error:
-        print(f"Blink receiver: {error}", file=sys.stderr)
+        print(f"Blink Live Events: {error}", file=sys.stderr)
         return 1
 
 

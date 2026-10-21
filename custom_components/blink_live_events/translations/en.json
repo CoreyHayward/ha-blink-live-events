@@ -21,11 +21,11 @@
       },
       "webhook": {
         "title": "Receiver URL",
-        "description": "Copy this private URL to the receiver's BLINK_PUSH_HA_WEBHOOK_URL setting:\n\n{webhook_url}\n\nAnyone with this URL can send events to Home Assistant. Keep it private."
+        "description": "Copy this private URL to the receiver's BLINK_LIVE_EVENTS_HA_WEBHOOK_URL setting:\n\n{webhook_url}\n\nAnyone with this URL can send events to Home Assistant. Keep it private."
       },
       "rotate_webhook": {
         "title": "Rotate receiver URL",
-        "description": "Submitting this form invalidates the current receiver URL. Update BLINK_PUSH_HA_WEBHOOK_URL in the receiver's private .env file afterward."
+        "description": "Submitting this form invalidates the current receiver URL. Update BLINK_LIVE_EVENTS_HA_WEBHOOK_URL in the receiver's private .env file afterward."
       }
     },
     "error": {

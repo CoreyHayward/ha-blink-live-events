@@ -17,13 +17,13 @@ PLATFORMS: tuple[Platform, ...] = (Platform.EVENT,)
 
 
 @dataclass
-class BlinkPushReceiverRuntimeData:
+class BlinkLiveEventsRuntimeData:
     """Runtime data for the receiver integration."""
 
     webhook_id: str
 
 
-type BlinkPushReceiverConfigEntry = ConfigEntry[BlinkPushReceiverRuntimeData]
+type BlinkLiveEventsConfigEntry = ConfigEntry[BlinkLiveEventsRuntimeData]
 
 
 async def _async_handle_webhook(
@@ -54,11 +54,11 @@ async def _async_handle_webhook(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: BlinkPushReceiverConfigEntry
+    hass: HomeAssistant, entry: BlinkLiveEventsConfigEntry
 ) -> bool:
     """Register the local webhook and event entity platform."""
     webhook_id = entry.options.get("webhook_id") or entry.data["webhook_id"]
-    entry.runtime_data = BlinkPushReceiverRuntimeData(webhook_id=webhook_id)
+    entry.runtime_data = BlinkLiveEventsRuntimeData(webhook_id=webhook_id)
 
     webhook.async_register(
         hass,
@@ -80,7 +80,7 @@ async def async_setup_entry(
 
 
 async def async_unload_entry(
-    hass: HomeAssistant, entry: BlinkPushReceiverConfigEntry
+    hass: HomeAssistant, entry: BlinkLiveEventsConfigEntry
 ) -> bool:
     """Unload entities and unregister the webhook."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
@@ -91,7 +91,7 @@ async def async_unload_entry(
 
 
 async def async_reload_entry(
-    hass: HomeAssistant, entry: BlinkPushReceiverConfigEntry
+    hass: HomeAssistant, entry: BlinkLiveEventsConfigEntry
 ) -> None:
     """Reload after the receiver URL options change."""
     await hass.config_entries.async_reload(entry.entry_id)

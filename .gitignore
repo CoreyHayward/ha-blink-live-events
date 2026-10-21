@@ -1,4 +1,4 @@
-/blink-push-receiver.tar.gz
+/blink-*.tar.gz
 .env
 firebase-config.json
 *.secret.json

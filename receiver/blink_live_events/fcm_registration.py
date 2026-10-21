@@ -34,10 +34,10 @@ DEFAULT_FIREBASE_CONFIG = (
     Path(__file__).resolve().parent.parent / "firebase-config.default.json"
 )
 FIREBASE_CONFIG_ENV = {
-    "google_api_key": "BLINK_PUSH_FIREBASE_API_KEY",
-    "google_app_id": "BLINK_PUSH_FIREBASE_APP_ID",
-    "project_id": "BLINK_PUSH_FIREBASE_PROJECT_ID",
-    "gcm_defaultSenderId": "BLINK_PUSH_FIREBASE_SENDER_ID",
+    "google_api_key": "BLINK_LIVE_EVENTS_FIREBASE_API_KEY",
+    "google_app_id": "BLINK_LIVE_EVENTS_FIREBASE_APP_ID",
+    "project_id": "BLINK_LIVE_EVENTS_FIREBASE_PROJECT_ID",
+    "gcm_defaultSenderId": "BLINK_LIVE_EVENTS_FIREBASE_SENDER_ID",
 }
 
 

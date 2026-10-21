@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from receiver.blink_push_receiver.capture import MessageCapture, classify
+from receiver.blink_live_events.capture import MessageCapture, classify
 from receiver.vendor.fcm_receiver.messages_manual import AppData, DataMessageStanza
 
 

@@ -1,11 +1,11 @@
 # Optional example: create your own response to the integration's HA event.
 # Replace the action with any HA service or sequence that suits your setup.
-- id: blink_push_receiver_optional_example
+- id: blink_live_events_optional_example
   alias: Example - react to a Blink push
   description: Optional starting point; this automation is not installed by the integration.
   triggers:
     - trigger: event
-      event_type: blink_push_receiver_event
+      event_type: blink_live_events_event
       event_data:
         classification: doorbell_press
   actions:
