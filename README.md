@@ -184,7 +184,7 @@ triggers:
 - Blink's app registration and OAuth flow may change. The receiver currently follows the Blink Android 60.0 protocol and needs revalidation after app updates.
 - This project receives doorbell and motion events only. It does not provide camera streams or clips; use a separate camera/live-view integration for those.
 
-Protocol notes and validation scope are documented in [BLINK-LIVE-EVENTS-INVESTIGATION.md](BLINK-LIVE-EVENTS-INVESTIGATION.md).
+Protocol notes and validation scope are documented in [the protocol investigation](docs/protocol-investigation.md).
 
 ## Development and validation
 
