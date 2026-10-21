@@ -130,12 +130,71 @@ async def test_webhook_rejects_unrecognized_or_incomplete_events(
             "classification": "camera_motion",
         },
     )
+    missing_generic_type_response = await client.post(
+        f"/api/webhook/{WEBHOOK_ID}",
+        json={"event_id": "generic-without-type", "classification": "other"},
+    )
     await hass.async_block_till_done()
 
     assert response.status == 400
     assert incomplete_response.status == 400
     assert unsupported_version_response.status == 400
+    assert missing_generic_type_response.status == 400
     assert received == []
+
+
+async def test_webhook_accepts_new_event_types_without_creating_native_entity(
+    hass, hass_client, config_entry
+):
+    """New Blink events reach the bus without needing a device allowlist."""
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = er.async_get(hass)
+    entities = er.async_entries_for_config_entry(registry, config_entry.entry_id)
+    received: list[Event] = []
+    hass.bus.async_listen(EVENT_TYPE, received.append)
+    client = await hass_client()
+    response = await client.post(
+        f"/api/webhook/{WEBHOOK_ID}",
+        json={
+            "event_id": "new-event-hash",
+            "classification": "other",
+            "category": "future_category",
+            "event_type": "new_sensor_activity",
+            "camera_name": "Unlisted camera model",
+        },
+    )
+    minimal_response = await client.post(
+        f"/api/webhook/{WEBHOOK_ID}",
+        json={
+            "event_id": "minimal-new-event-hash",
+            "classification": "other",
+            "event_type": "new_sensor_activity",
+        },
+    )
+    await hass.async_block_till_done()
+
+    assert response.status == 204
+    assert minimal_response.status == 204
+    assert len(received) == 2
+    assert received[0].data == {
+        "schema_version": 1,
+        "source": DOMAIN,
+        "event_id": "new-event-hash",
+        "classification": "other",
+        "category": "future_category",
+        "event_type": "new_sensor_activity",
+        "camera_name": "Unlisted camera model",
+    }
+    assert received[1].data == {
+        "schema_version": 1,
+        "source": DOMAIN,
+        "event_id": "minimal-new-event-hash",
+        "classification": "other",
+        "event_type": "new_sensor_activity",
+    }
+    assert len(entities) == 2
 
 
 async def test_receiver_generated_motion_event_reaches_ha(

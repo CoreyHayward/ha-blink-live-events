@@ -7,6 +7,7 @@ from typing import Any
 from .const import (
     CLASSIFICATION_DOORBELL,
     CLASSIFICATION_MOTION,
+    CLASSIFICATION_OTHER,
     CLASSIFICATIONS,
     DOMAIN,
 )
@@ -32,6 +33,10 @@ def normalize_event(body: dict[str, Any]) -> dict[str, Any] | None:
 
     event_id = _optional_string(body.get("event_id"), max_length=128)
     if event_id is None:
+        return None
+
+    event_type = _optional_string(body.get("event_type"), max_length=80)
+    if classification == CLASSIFICATION_OTHER and event_type is None:
         return None
 
     normalized: dict[str, Any] = {

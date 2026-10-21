@@ -14,7 +14,7 @@ End-to-end push reception and Home Assistant delivery were verified for the Blin
 | Blink Outdoor 3 (two units) | `catalina` | Motion on both units (`category=motion`, `event_type=cam2sm_motion`) |
 | Blink Mini Pan-Tilt Camera (OWL) | `mini/owl` | No result recorded |
 
-The model identifiers come from Blink's app protocol. Testing covers this hardware and app setup; it does not confirm compatibility with every Blink camera or doorbell model.
+The model identifiers come from Blink's app protocol. Testing covers only the listed hardware and app setup. The receiver does not keep a camera model allowlist: if Blink sends a push from another device with a non-empty `event_type`, it is still forwarded as a generic event for you to inspect and use.
 
 ## What you get
 
@@ -126,14 +126,14 @@ The image is `ghcr.io/coreyhayward/ha-blink-live-events`. Once public, it can be
 
 ## Home Assistant event contract
 
-The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Its `event_data` fields are:
+The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Any other push with a non-empty `event_type` is forwarded as `classification: other`, including events from untested camera models and event types. No per-camera model list is required. Events without an `event_type` are retained privately by the receiver but are not forwarded. The integration keeps native event entities for doorbell presses and motion; generic events remain available through the event bus for custom integrations and automations. Its `event_data` fields are:
 
 | Field | Meaning |
 | --- | --- |
 | `schema_version` | Integer event contract version, initially `1`. |
 | `source` | Always `blink_live_events`. |
 | `event_id` | Stable SHA-256 delivery key used by the receiver to suppress duplicate delivery. |
-| `classification` | `doorbell_press` or `camera_motion`. |
+| `classification` | `doorbell_press`, `camera_motion`, or `other` for a new event type. |
 | `category` | Blink's notification category when present (`media` or `motion`). |
 | `event_type` | Blink's event type, such as `button_press`, `cam2sm_motion`, or doorbell motion's `pir`. |
 | `ha_event_type` | HA semantic type: `ring` for a doorbell or `motion` for a camera. |
@@ -142,7 +142,7 @@ The integration fires `blink_live_events_event` once for every accepted push. Au
 | `created_at` | Blink event timestamp, when present. |
 | `received_at` | Receiver UTC receipt timestamp. |
 
-Optional fields may be absent if the Blink push does not include them. The `event_type` field is Blink's raw event type; `ha_event_type` is the stable HA semantic type. Event entity states use `ring` and `motion`, and their attributes contain the allowlisted metadata (with Blink's raw type exposed as `blink_event_type`).
+Optional fields may be absent if the Blink push does not include them. For `other`, the minimum accepted fields are `event_id` and a non-empty `event_type`. The `event_type` field is Blink's raw event type; `ha_event_type` is present only for recognized doorbell and motion events. Event entity states use `ring` and `motion`, and their attributes contain sanitized metadata (with Blink's raw type exposed as `blink_event_type`).
 
 ### Build your own automation
 
@@ -162,7 +162,7 @@ actions:
       message: "{{ trigger.event.data.camera_name or 'A Blink camera' }} detected motion."
 ```
 
-For a doorbell, set `classification: doorbell_press`. Or automate from the native event entities by selecting one as an event trigger in the HA automation editor. An optional starting point is [`examples/automation-event-bus.yaml`](examples/automation-event-bus.yaml); the integration does not install it.
+For a doorbell, set `classification: doorbell_press`. To handle a type that has not been mapped yet, filter on `classification: other` and branch on the raw `event_type`. Or automate from the native event entities by selecting one as an event trigger in the HA automation editor. An optional starting point is [`examples/automation-event-bus.yaml`](examples/automation-event-bus.yaml); the integration does not install it.
 
 To target one camera, add its exact Blink name as `camera_name` in the event filter. For example, replace `Camera 1` below with the name in your Blink app:
 

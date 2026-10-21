@@ -59,14 +59,14 @@ docker compose -f receiver/compose.yaml logs -f blink-live-events
 
 `FCM transport connected; waiting for Blink pushes` confirms that Google transport connected. Validate that the separate Blink association is accepted by generating one doorbell press and one motion-only event. A push must arrive from the cloud connection; successful registration alone is not event validation.
 
-Blink doorbell motion currently arrives as `event_type=pir` under `category=media`; the receiver classifies it as camera motion. Other motion events use `cloud_motion` or `cam2sm_motion`.
+Blink doorbell motion currently arrives as `event_type=pir` under `category=media`; the receiver classifies it as camera motion. Other motion events use `cloud_motion` or `cam2sm_motion`. Any other push with a non-empty `event_type` is forwarded as a generic event, even when its category or camera model is unfamiliar. The Home Assistant integration requires an `event_id` and `event_type` for generic events; events without an event type are retained privately but not sent.
 
 ## Configuration and privacy
 
 - The bundled Firebase file contains public client identifiers only. The ignored `.env` may contain replacement values; keep it out of commits.
 - `.env` is ignored by Git. It contains the HA webhook URL; keep its permissions at `0600`.
 - Receiver state is stored in the private Docker volume `receiver_blink-live-events-data`. It contains FCM and Blink session tokens plus private raw message captures. Protect backups of this volume accordingly.
-- The HA payload is allowlisted and omits Blink account IDs, transaction IDs, FCM IDs, and raw push data.
+- The HA payload contains sanitized event fields and omits Blink account IDs, transaction IDs, FCM IDs, and raw push data. New event types are not blocked by a per-camera or per-event allowlist.
 - The Compose service has no published listening ports. It initiates the outbound FCM connection and sends events to HA.
 - Change the webhook ID from the integration Configure flow if its URL is exposed, then update `.env` and restart the receiver.
 

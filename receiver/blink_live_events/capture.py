@@ -55,8 +55,10 @@ def payload_fields(message: DataMessageStanza) -> dict[str, Any]:
 
 
 def classify(payload: dict[str, Any]) -> str:
-    category = str(payload.get("category", "")).lower()
-    event_type = str(payload.get("event_type", "")).lower()
+    category_value = payload.get("category")
+    event_type_value = payload.get("event_type")
+    category = category_value.strip().lower() if isinstance(category_value, str) else ""
+    event_type = event_type_value.strip().lower() if isinstance(event_type_value, str) else ""
     if category == "media" and event_type == "button_press":
         return "doorbell_press"
     # Blink doorbells report PIR motion under category=media, while other
@@ -64,7 +66,9 @@ def classify(payload: dict[str, Any]) -> str:
     # movement even when Blink's notification category is misleading.
     if event_type in MOTION_TYPES and (category == "motion" or event_type == "pir"):
         return "camera_motion"
-    return "unclassified"
+    # Forward new Blink event types without a per-device or per-event allowlist.
+    # The HA integration still sanitizes the payload before publishing it.
+    return "other" if event_type else "unclassified"
 
 
 def _append_private(path: Path, record: dict[str, Any]) -> None:
@@ -148,6 +152,8 @@ class MessageCapture:
                 print(f"{received_at} Blink doorbell press received", flush=True)
             elif event_type == "camera_motion":
                 print(f"{received_at} Blink camera motion received", flush=True)
+            elif event_type == "other":
+                print(f"{received_at} Blink event received (other)", flush=True)
             else:
                 print(f"{received_at} Blink push received (unclassified)", flush=True)
 

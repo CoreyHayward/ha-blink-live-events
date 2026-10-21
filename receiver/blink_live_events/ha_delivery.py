@@ -14,7 +14,7 @@ from urllib.request import Request, urlopen
 from .capture import EVENTS_NAME, _append_private, utc_now
 
 
-DELIVERABLE_CLASSIFICATIONS = {"doorbell_press", "camera_motion"}
+DELIVERABLE_CLASSIFICATIONS = {"doorbell_press", "camera_motion", "other"}
 
 
 def delivery_key(record: dict[str, Any]) -> str:

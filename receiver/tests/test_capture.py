@@ -17,6 +17,18 @@ class CaptureWakeTests(unittest.TestCase):
             "camera_motion",
         )
 
+    def test_pan_tilt_camera_pir_is_classified_as_camera_motion(self) -> None:
+        self.assertEqual(
+            classify(
+                {
+                    "category": "media",
+                    "event_type": "pir",
+                    "camera_name": "Pan-Tilt Camera",
+                }
+            ),
+            "camera_motion",
+        )
+
     def test_doorbell_pir_motion_wakes_delivery_after_persist(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             data_dir = Path(temporary)
@@ -63,7 +75,44 @@ class CaptureWakeTests(unittest.TestCase):
 
             self.assertEqual(wake_checks, [True])
 
-    def test_unclassified_message_does_not_wake_delivery(self) -> None:
+    def test_unknown_event_type_is_classified_as_other(self) -> None:
+        self.assertEqual(
+            classify(
+                {
+                    "category": "unrecognized-category",
+                    "event_type": "new_sensor_activity",
+                    "camera_name": "Unlisted camera model",
+                }
+            ),
+            "other",
+        )
+        self.assertEqual(classify({"event_type": "new_sensor_activity"}), "other")
+
+    def test_unknown_event_type_wakes_delivery_after_persist(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            data_dir = Path(temporary)
+            (data_dir / "fcm-state.json").write_text("{}", encoding="utf-8")
+            wake_checks: list[bool] = []
+
+            def wake() -> None:
+                rows = [
+                    json.loads(line)
+                    for line in (data_dir / "messages.ndjson").read_text().splitlines()
+                ]
+                wake_checks.append(any(row.get("classification") == "other" for row in rows))
+
+            capture = MessageCapture(data_dir, on_event=wake)
+            message = DataMessageStanza(
+                id="new-event-message-id",
+                category="unknown",
+                app_data=[AppData("event_type", "new_sensor_activity")],
+            )
+
+            capture.handle(message, SimpleNamespace(persistent_ids=[]))
+
+            self.assertEqual(wake_checks, [True])
+
+    def test_event_without_event_type_does_not_wake_delivery(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             data_dir = Path(temporary)
             (data_dir / "fcm-state.json").write_text("{}", encoding="utf-8")
@@ -72,7 +121,7 @@ class CaptureWakeTests(unittest.TestCase):
             message = DataMessageStanza(
                 id="message-id",
                 category="unknown",
-                app_data=[AppData("event_type", "other")],
+                app_data=[AppData("camera_name", "Unknown camera")],
             )
 
             capture.handle(message, SimpleNamespace(persistent_ids=[]))
