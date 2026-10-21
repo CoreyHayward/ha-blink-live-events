@@ -185,6 +185,8 @@ triggers:
       camera_name: "Camera 1"
 ```
 
+For a complete example based on the maintainer's setup, see [`examples/automation-notify-with-snapshot.yaml`](examples/automation-notify-with-snapshot.yaml). It maps the four camera names to that setup's proxy entities, asks the proxy for a fresh snapshot, saves it with [`camera.snapshot`](https://www.home-assistant.io/actions/camera.snapshot/), and then sends it to two Home Assistant Companion apps. Home Assistant runs these actions in order, so the notifications follow the completed snapshot request. Replace the camera and phone entity IDs with your own. The proxy refresh button wakes the camera and uses battery power. The example saves a unique image per event under `/media`; remove older images periodically. Companion attachments use Home Assistant's authenticated [`/media/local/` path](https://companion.home-assistant.io/docs/notifications/notification-attachments/).
+
 ## Security and limitations
 
 - The HA webhook URL is a secret. HA registers it as local-only; keep the URL and `.env` private and rotate it if exposed.
