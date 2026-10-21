@@ -42,7 +42,7 @@ The receiver holds its own FCM identity and Blink client session. Home Assistant
 
 You need Home Assistant 2026.10.0 or newer, plus a Linux host with Docker Compose v2 and outbound internet access. The receiver can run on a separate host from Home Assistant.
 
-1. **Install the Home Assistant integration.** Once this repository is public, add it to HACS as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. While it is private, use the manual install steps below; cloning in the next step requires GitHub access. Add the integration, open **Configure → View receiver URL**, and copy the private URL.
+1. **Install the Home Assistant integration.** Add this repository to HACS as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. Add the integration, open **Configure → View receiver URL**, and copy the private URL. For a manual install, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
 
 2. **Prepare the receiver.** On your Linux Docker host, download the repo and create its private environment file:
 
@@ -75,7 +75,7 @@ The custom integration requires Home Assistant 2026.10.0 or newer.
 
 ### 1. Install the Home Assistant integration
 
-Once this repository is public, add it in HACS as a custom **Integration** repository, then install **Blink Live Events** and restart Home Assistant. HACS requires a public GitHub repository. While this repository is private, install manually: copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
+In HACS, add this repository as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. To install manually, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
 
 In **Settings → Devices & services → Add integration**, add **Blink Live Events**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
 
@@ -83,7 +83,7 @@ In **Settings → Devices & services → Add integration**, add **Blink Live Eve
 
 Use a Linux host with Docker Engine and Docker Compose v2, outbound internet access, and access to your HA local URL. The receiver makes an outbound connection to Google's MCS service (TCP 5228) and sends events to HA. It has no inbound listening port.
 
-Once the repository is public, download just the Compose file and environment template; you do not need to clone the source repository:
+Download just the Compose file and environment template; you do not need to clone the source repository:
 
 ```sh
 mkdir -p blink-live-events/receiver
@@ -128,9 +128,9 @@ See [receiver/README.md](receiver/README.md) for registration details, security,
 
 ### Container image updates and local builds
 
-After the repository is public, the **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. Publishing is gated while the repository is private. Run the Validate workflow manually on `main` once after making the repository public; later pushes and version tags publish automatically.
+The **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. On the first public release, run the Validate workflow manually on `main` to publish the initial image; later pushes and version tags publish automatically.
 
-The image is `ghcr.io/coreyhayward/ha-blink-live-events`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
+The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 
