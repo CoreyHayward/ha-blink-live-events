@@ -4,6 +4,39 @@ Receive Blink doorbell presses and camera motion in Home Assistant over Blink's 
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
+## Quickstart
+
+You need Home Assistant 2026.10.0 or newer, plus a Linux host with Docker Engine, Docker Compose v2, `curl`, and outbound internet access. The receiver can run on a separate host from Home Assistant, but it needs network access to HA's internal URL.
+
+1. **Install the Home Assistant integration.** In HACS, add `https://github.com/CoreyHayward/ha-blink-live-events` as a custom repository with the **Integration** category, install **Blink Live Events**, and restart Home Assistant. Add the integration, open **Configure → View receiver URL**, and copy the private URL. For a manual install, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA. If HA cannot show a receiver URL, configure its internal URL in **Settings → System → Network** first.
+
+2. **Prepare the receiver.** On your Linux Docker host, download the Compose file and environment template:
+
+   ```sh
+   mkdir -p blink-live-events/receiver
+   cd blink-live-events
+   curl -fsSL https://raw.githubusercontent.com/CoreyHayward/ha-blink-live-events/main/receiver/compose.yaml -o receiver/compose.yaml
+   curl -fsSL https://raw.githubusercontent.com/CoreyHayward/ha-blink-live-events/main/.env.example -o .env.example
+   cp .env.example .env
+   chmod 600 .env
+   ```
+
+   Put the copied URL in `.env` as `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL`.
+
+3. **Register Blink and start listening.** Run these commands from the setup directory:
+
+   ```sh
+   docker compose -f receiver/compose.yaml pull
+   docker compose -f receiver/compose.yaml run --rm blink-live-events register-fcm
+   docker compose -f receiver/compose.yaml run --rm -it blink-live-events register-blink
+   docker compose -f receiver/compose.yaml up -d
+   docker compose -f receiver/compose.yaml logs -f blink-live-events
+   ```
+
+   `register-blink` opens a Blink-hosted sign-in flow. Complete sign-in and verification in your browser, then paste the full callback URL into the hidden terminal prompt. The receiver never sees your password or verification code. Test with one doorbell press and one separate motion event.
+
+See [Installation](#installation) for detailed setup, troubleshooting, and security information.
+
 ## Devices tested
 
 End-to-end push reception and Home Assistant delivery were verified for the Blink Video Doorbell, Blink Mini Pan-Tilt Camera, and two Blink Outdoor 3 cameras below.
@@ -37,37 +70,6 @@ flowchart LR
 ```
 
 The receiver holds its own FCM identity and Blink client session. Home Assistant never receives Blink account credentials. The receiver forwards only the event metadata needed for automations; private FCM IDs, Blink account IDs, transaction IDs, and raw push payloads stay in the receiver's private data volume.
-
-## Quickstart
-
-You need Home Assistant 2026.10.0 or newer, plus a Linux host with Docker Compose v2 and outbound internet access. The receiver can run on a separate host from Home Assistant.
-
-1. **Install the Home Assistant integration.** Add this repository to HACS as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. Add the integration, open **Configure → View receiver URL**, and copy the private URL. For a manual install, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
-
-2. **Prepare the receiver.** On your Linux Docker host, download the repo and create its private environment file:
-
-   ```sh
-   git clone --depth 1 https://github.com/CoreyHayward/ha-blink-live-events.git
-   cd ha-blink-live-events
-   cp .env.example .env
-   chmod 600 .env
-   ```
-
-   Put the copied URL in `.env` as `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL`.
-
-3. **Register Blink and start listening.** Run these commands from the repository directory:
-
-   ```sh
-   docker compose -f receiver/compose.yaml pull
-   docker compose -f receiver/compose.yaml run --rm blink-live-events register-fcm
-   docker compose -f receiver/compose.yaml run --rm -it blink-live-events register-blink
-   docker compose -f receiver/compose.yaml up -d
-   docker compose -f receiver/compose.yaml logs -f blink-live-events
-   ```
-
-   `register-blink` opens a Blink-hosted sign-in flow. Complete sign-in and verification in your browser, then paste the full callback URL into the hidden terminal prompt. The receiver never sees your password or verification code. Test with one doorbell press and one separate motion event.
-
-See [Installation](#installation) for manual integration setup, troubleshooting, and security details.
 
 ## Installation
 
@@ -130,7 +132,7 @@ See [receiver/README.md](receiver/README.md) for registration details, security,
 
 The **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. On the first public release, run the Validate workflow manually on `main` to publish the initial image; later pushes and version tags publish automatically.
 
-The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
+The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag. To pin a version, set `BLINK_LIVE_EVENTS_IMAGE_TAG` in `.env` to a published `v*` tag. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 
