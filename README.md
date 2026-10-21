@@ -1,18 +1,22 @@
 # Blink Live Events
 
+<p align="center">
+  <img src="brand/logo.png" alt="Blink Live Events camera logo" width="400">
+</p>
+
 Receive Blink doorbell presses and camera motion in Home Assistant over Blink's cloud push channel. Events are forwarded as soon as Blink sends them, so automations do not wait for the polling cycle used by Home Assistant's [official Blink integration](https://www.home-assistant.io/integrations/blink/) or for a clip to finish. A Home Assistant custom integration exposes native event entities and a general event-bus event, so you can decide what automations or integrations to build.
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
 ## Devices tested
 
-End-to-end push reception and Home Assistant delivery were verified for the Blink Video Doorbell and two Blink Outdoor 3 cameras below. A Blink Mini Pan-Tilt Camera was present in the test setup, but no end-to-end result was recorded for it.
+End-to-end push reception and Home Assistant delivery were verified for the Blink Video Doorbell, Blink Mini Pan-Tilt Camera, and two Blink Outdoor 3 cameras below.
 
 | Product | Blink-reported model | Events observed |
 | --- | --- | --- |
 | Blink Video Doorbell | `lotus` | Button press (`button_press`) and PIR motion (`category=media`, `event_type=pir`) |
 | Blink Outdoor 3 (two units) | `catalina` | Motion on both units (`category=motion`, `event_type=cam2sm_motion`) |
-| Blink Mini Pan-Tilt Camera (OWL) | `mini/owl` | No result recorded |
+| Blink Mini Pan-Tilt Camera (OWL) | `mini/owl` | Motion (`category=media`, `event_type=pir`); forwarded to HA and alert received |
 
 The model identifiers come from Blink's app protocol. Testing covers only the listed hardware and app setup. The receiver does not keep a camera model allowlist: if Blink sends a push from another device with a non-empty `event_type`, it is still forwarded as a generic event for you to inspect and use.
 
