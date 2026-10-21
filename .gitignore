@@ -1,0 +1,11 @@
+/blink-push-receiver.tar.gz
+.env
+firebase-config.json
+*.secret.json
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv*/
+*.apk
+*.apks
+*.aab

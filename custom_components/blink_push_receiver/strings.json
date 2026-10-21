@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Blink Push Receiver",
+        "description": "Create the local Home Assistant event endpoint. After setup, choose Configure to view its private receiver URL."
+      }
+    },
+    "abort": {
+      "already_configured": "Blink Push Receiver is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Blink Push Receiver",
+        "menu_options": {
+          "webhook": "View receiver URL",
+          "rotate_webhook": "Rotate receiver URL"
+        }
+      },
+      "webhook": {
+        "title": "Receiver URL",
+        "description": "Copy this private URL to the receiver's BLINK_PUSH_HA_WEBHOOK_URL setting:\n\n{webhook_url}\n\nAnyone with this URL can send events to Home Assistant. Keep it private."
+      },
+      "rotate_webhook": {
+        "title": "Rotate receiver URL",
+        "description": "Submitting this form invalidates the current receiver URL. Update BLINK_PUSH_HA_WEBHOOK_URL in the receiver's private .env file afterward."
+      }
+    },
+    "error": {
+      "set_internal_url": "Set Home Assistant's internal URL to an address the receiver can reach, then try again."
+    }
+  },
+  "entity": {
+    "event": {
+      "doorbell": {
+        "name": "Doorbell"
+      },
+      "camera_motion": {
+        "name": "Camera motion"
+      }
+    }
+  }
+}

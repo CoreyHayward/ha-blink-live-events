@@ -1,0 +1,2 @@
+# Keep this aligned with the running Blink Live View Proxy and Home Assistant.
+blinkpy==0.25.9

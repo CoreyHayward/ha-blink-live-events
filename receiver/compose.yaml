@@ -1,0 +1,32 @@
+services:
+  blink-push-receiver:
+    build:
+      context: ..
+      dockerfile: receiver/Dockerfile
+      args:
+        BLINK_PUSH_UID: ${BLINK_PUSH_UID:-1000}
+        BLINK_PUSH_GID: ${BLINK_PUSH_GID:-1000}
+    container_name: blink-push-receiver
+    command: ["listen"]
+    restart: unless-stopped
+    init: true
+    read_only: true
+    user: "${BLINK_PUSH_UID:-1000}:${BLINK_PUSH_GID:-1000}"
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      BLINK_PUSH_DATA_DIR: /data
+    volumes:
+      - blink-push-data:/data
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  blink-push-data:

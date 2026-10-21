@@ -1,0 +1,10 @@
+**/.env
+**/firebase-config.json
+**/*.secret.json
+*.tar.gz
+*.apk
+*.apks
+*.aab
+.git
+.git/**
+**/__pycache__/
