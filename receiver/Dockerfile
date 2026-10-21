@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-LABEL org.opencontainers.image.source="https://github.com/CoreyHayward/blink-push-receiver" \
-      org.opencontainers.image.description="Blink cloud push receiver with Home Assistant event delivery" \
+LABEL org.opencontainers.image.source="https://github.com/CoreyHayward/ha-blink-live-events" \
+      org.opencontainers.image.description="Real-time Blink push events for Home Assistant" \
       org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

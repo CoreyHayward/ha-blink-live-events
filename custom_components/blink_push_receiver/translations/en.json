@@ -2,18 +2,18 @@
   "config": {
     "step": {
       "user": {
-        "title": "Add Blink Push Receiver",
+        "title": "Add Blink Live Events",
         "description": "Create the local Home Assistant event endpoint. After setup, choose Configure to view its private receiver URL."
       }
     },
     "abort": {
-      "already_configured": "Blink Push Receiver is already configured."
+      "already_configured": "Blink Live Events is already configured."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Blink Push Receiver",
+        "title": "Blink Live Events",
         "menu_options": {
           "webhook": "View receiver URL",
           "rotate_webhook": "Rotate receiver URL"

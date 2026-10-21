@@ -1,4 +1,4 @@
-"""Tests for Blink Push Receiver's Home Assistant event contract."""
+"""Tests for Blink Live Events' Home Assistant event contract."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def config_entry(hass):
     """Add the integration config entry to the test instance."""
     entry = MockConfigEntry(
         domain=DOMAIN,
-        title="Blink Push Receiver",
+        title="Blink Live Events",
         data={"webhook_id": WEBHOOK_ID},
         unique_id=DOMAIN,
     )

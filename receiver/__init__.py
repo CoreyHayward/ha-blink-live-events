@@ -1,1 +1,1 @@
-"""Blink push receiver source package."""
+"""Blink Live Events receiver source package."""

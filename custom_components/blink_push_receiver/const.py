@@ -1,4 +1,4 @@
-"""Constants for the Blink Push Receiver integration."""
+"""Constants for the Blink Live Events integration."""
 
 DOMAIN = "blink_push_receiver"
 EVENT_TYPE = "blink_push_receiver_event"

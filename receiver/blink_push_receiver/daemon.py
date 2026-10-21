@@ -81,7 +81,7 @@ def listen(data_dir: Path, heartbeat_seconds: int = 600) -> None:
                 raise RuntimeError("FCM transport login rejected; check the independent registration state")
             if stop_requested.wait(1):
                 break
-        print("Stopping Blink push receiver", flush=True)
+        print("Stopping Blink Live Events receiver", flush=True)
     finally:
         stop_requested.set()
         delivery_wake.set()

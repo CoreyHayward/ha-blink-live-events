@@ -1,13 +1,13 @@
 {
   "domain": "blink_push_receiver",
-  "name": "Blink Push Receiver",
+  "name": "Blink Live Events",
   "codeowners": ["@CoreyHayward"],
   "config_flow": true,
   "dependencies": ["http", "webhook"],
-  "documentation": "https://github.com/CoreyHayward/blink-push-receiver",
+  "documentation": "https://github.com/CoreyHayward/ha-blink-live-events",
   "integration_type": "hub",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/CoreyHayward/blink-push-receiver/issues",
+  "issue_tracker": "https://github.com/CoreyHayward/ha-blink-live-events/issues",
   "single_config_entry": true,
   "version": "0.1.0"
 }

@@ -47,8 +47,8 @@ class BlinkPushEvent(EventEntity):
         self._attr_has_entity_name = True
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry_id)},
-            name="Blink Push Receiver",
-            manufacturer="Blink Push Receiver community project",
+            name="Blink Live Events",
+            manufacturer="Blink Live Events community project",
             model="FCM event bridge",
         )
 

@@ -1,6 +1,6 @@
 services:
   blink-push-receiver:
-    image: ghcr.io/coreyhayward/blink-push-receiver:${BLINK_PUSH_IMAGE_TAG:-latest}
+    image: ghcr.io/coreyhayward/ha-blink-live-events:${BLINK_PUSH_IMAGE_TAG:-latest}
     container_name: blink-push-receiver
     command: ["listen"]
     restart: unless-stopped

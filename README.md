@@ -1,6 +1,6 @@
-# Blink Push Receiver
+# Blink Live Events
 
-Receive Blink doorbell presses and camera motion as real-time Home Assistant events. The standalone receiver listens to Blink's cloud push delivery; it does not poll a media list or wait for a clip. A Home Assistant custom integration exposes the events as native event entities and a general event-bus event, so you can decide what automations or integrations to build.
+Receive Blink doorbell presses and camera motion in Home Assistant over Blink's cloud push channel. Events are forwarded as soon as Blink sends them, so automations do not wait for the polling cycle used by Home Assistant's [official Blink integration](https://www.home-assistant.io/integrations/blink/) or for a clip to finish. A Home Assistant custom integration exposes native event entities and a general event-bus event, so you can decide what automations or integrations to build.
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
@@ -32,9 +32,9 @@ The custom integration requires Home Assistant 2026.10.0 or newer.
 
 ### 1. Install the Home Assistant integration
 
-Once this repository is public, add it in HACS as a custom **Integration** repository, then install **Blink Push Receiver** and restart Home Assistant. HACS requires a public GitHub repository. While this repository is private, install manually: copy `custom_components/blink_push_receiver` into `<config>/custom_components/` and restart HA.
+Once this repository is public, add it in HACS as a custom **Integration** repository, then install **Blink Live Events** and restart Home Assistant. HACS requires a public GitHub repository. While this repository is private, install manually: copy `custom_components/blink_push_receiver` into `<config>/custom_components/` and restart HA.
 
-In **Settings → Devices & services → Add integration**, add **Blink Push Receiver**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
+In **Settings → Devices & services → Add integration**, add **Blink Live Events**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
 
 ### 2. Download the receiver setup files
 
@@ -43,10 +43,10 @@ Use a Linux host with Docker Engine and Docker Compose v2, outbound internet acc
 Once the repository is public, download just the Compose file and environment template; you do not need to clone the source repository:
 
 ```sh
-mkdir -p blink-push/receiver
-cd blink-push
-curl -fsSL https://raw.githubusercontent.com/CoreyHayward/blink-push-receiver/main/receiver/compose.yaml -o receiver/compose.yaml
-curl -fsSL https://raw.githubusercontent.com/CoreyHayward/blink-push-receiver/main/.env.example -o .env.example
+mkdir -p blink-live-events/receiver
+cd blink-live-events
+curl -fsSL https://raw.githubusercontent.com/CoreyHayward/ha-blink-live-events/main/receiver/compose.yaml -o receiver/compose.yaml
+curl -fsSL https://raw.githubusercontent.com/CoreyHayward/ha-blink-live-events/main/.env.example -o .env.example
 cp .env.example .env
 chmod 600 .env
 ```
@@ -87,7 +87,7 @@ See [receiver/README.md](receiver/README.md) for registration details, security,
 
 After the repository is public, the **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. Publishing is gated while the repository is private. Run the Validate workflow manually on `main` once after making the repository public; later pushes and version tags publish automatically.
 
-The image is `ghcr.io/coreyhayward/blink-push-receiver`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/blink-push-receiver:local .`, then set `BLINK_PUSH_IMAGE_TAG=local` in `.env`.
+The image is `ghcr.io/coreyhayward/ha-blink-live-events`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_PUSH_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 

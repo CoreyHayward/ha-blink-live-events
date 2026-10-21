@@ -1,4 +1,4 @@
-"""Home Assistant integration for the Blink Push Receiver service."""
+"""Home Assistant integration for Blink Live Events."""
 
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ async def async_setup_entry(
     webhook.async_register(
         hass,
         DOMAIN,
-        "Blink Push Receiver",
+        "Blink Live Events",
         webhook_id,
         _async_handle_webhook,
         allowed_methods=["POST"],

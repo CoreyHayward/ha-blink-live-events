@@ -83,7 +83,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/coreyhayward/blink-push-receiver
+          images: ghcr.io/coreyhayward/ha-blink-live-events
           tags: |
             type=raw,value=latest
             type=ref,event=branch
@@ -99,5 +99,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=blink-push-receiver
-          cache-to: type=gha,mode=max,scope=blink-push-receiver
+          cache-from: type=gha,scope=ha-blink-live-events
+          cache-to: type=gha,mode=max,scope=ha-blink-live-events

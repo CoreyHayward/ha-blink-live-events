@@ -293,7 +293,7 @@ def _discover_account(state: dict[str, Any], data_dir: Path) -> dict[str, Any]:
     return state
 
 
-def associate_fcm_token(data_dir: Path, client_name: str = "Blink Push Receiver") -> Path:
+def associate_fcm_token(data_dir: Path, client_name: str = "Blink Live Events") -> Path:
     """Create/refresh a separate Blink session and associate this FCM token."""
     ensure_private_dir(data_dir)
     fcm_state = read_json(data_dir / "fcm-state.json")

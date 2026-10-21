@@ -1,4 +1,4 @@
-"""Config and options flows for Blink Push Receiver."""
+"""Config and options flows for Blink Live Events."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class BlinkPushReceiverConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             return self.async_create_entry(
-                title="Blink Push Receiver",
+                title="Blink Live Events",
                 data={"webhook_id": webhook.async_generate_id()},
             )
 
