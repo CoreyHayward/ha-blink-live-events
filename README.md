@@ -36,32 +36,32 @@ Once this repository is public, add it in HACS as a custom **Integration** repos
 
 In **Settings → Devices & services → Add integration**, add **Blink Push Receiver**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
 
-### 2. Prepare a receiver host
+### 2. Download the receiver setup files
 
 Use a Linux host with Docker Engine and Docker Compose v2, outbound internet access, and access to your HA local URL. The receiver makes an outbound connection to Google's MCS service (TCP 5228) and sends events to HA. It has no inbound listening port.
 
-Clone the repository on the host that will run the receiver:
+Once the repository is public, download just the Compose file and environment template; you do not need to clone the source repository:
 
 ```sh
-git clone https://github.com/CoreyHayward/blink-push-receiver.git
-cd blink-push-receiver
+mkdir -p blink-push/receiver
+cd blink-push
+curl -fsSL https://raw.githubusercontent.com/CoreyHayward/blink-push-receiver/main/receiver/compose.yaml -o receiver/compose.yaml
+curl -fsSL https://raw.githubusercontent.com/CoreyHayward/blink-push-receiver/main/.env.example -o .env.example
+cp .env.example .env
+chmod 600 .env
 ```
 
-The receiver includes the minimal Firebase client configuration currently used by the Blink Android app, so you do not need to extract values from the app. If Blink changes its Firebase project, override individual values in `.env`; see the [receiver guide](receiver/README.md). These are Firebase client identifiers, not user credentials or FCM registration tokens.
+The receiver image includes the minimal Firebase client configuration currently used by the Blink Android app, so you do not need to extract values from the app. If Blink changes its Firebase project, override individual values in `.env`; see the [receiver guide](receiver/README.md). These are Firebase client identifiers, not user credentials or FCM registration tokens.
 
 ### 3. Register Blink and start listening
 
-From the repository root, create the private environment file and set the Compose user IDs:
+Set `BLINK_PUSH_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest`; set `BLINK_PUSH_IMAGE_TAG` to a release such as `v1.0.0` to pin a version. Pull the image for your host architecture:
 
 ```sh
-cp .env.example .env
-chmod 600 .env
-export BLINK_PUSH_UID="$(id -u)"
-export BLINK_PUSH_GID="$(id -g)"
-docker compose -f receiver/compose.yaml build
+docker compose -f receiver/compose.yaml pull
 ```
 
-Set `BLINK_PUSH_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. Then create the independent FCM identity and associate it with Blink:
+Create the independent FCM identity and associate it with Blink:
 
 ```sh
 docker compose -f receiver/compose.yaml run --rm \
@@ -82,6 +82,12 @@ docker compose -f receiver/compose.yaml logs -f blink-push-receiver
 The listener waits for real Blink pushes. Test one doorbell press and a separate motion-only event to validate your own registration. A connected FCM transport alone does not prove Blink has associated the token.
 
 See [receiver/README.md](receiver/README.md) for registration details, security, and troubleshooting limitations.
+
+### Container image updates and local builds
+
+After the repository is public, the **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. Publishing is gated while the repository is private. Run the Validate workflow manually on `main` once after making the repository public; later pushes and version tags publish automatically.
+
+The image is `ghcr.io/coreyhayward/blink-push-receiver`. Once public, it can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag; use a release tag in `.env` to pin a version. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/blink-push-receiver:local .`, then set `BLINK_PUSH_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 

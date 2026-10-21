@@ -1,17 +1,11 @@
 services:
   blink-push-receiver:
-    build:
-      context: ..
-      dockerfile: receiver/Dockerfile
-      args:
-        BLINK_PUSH_UID: ${BLINK_PUSH_UID:-1000}
-        BLINK_PUSH_GID: ${BLINK_PUSH_GID:-1000}
+    image: ghcr.io/coreyhayward/blink-push-receiver:${BLINK_PUSH_IMAGE_TAG:-latest}
     container_name: blink-push-receiver
     command: ["listen"]
     restart: unless-stopped
     init: true
     read_only: true
-    user: "${BLINK_PUSH_UID:-1000}:${BLINK_PUSH_GID:-1000}"
     env_file:
       - path: ../.env
         required: false

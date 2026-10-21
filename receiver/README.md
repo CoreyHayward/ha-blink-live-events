@@ -26,16 +26,12 @@ These environment variables override the corresponding bundled values when creat
 
 The optional JSON file is merged over the bundled defaults, then any `.env` overrides are applied. Do not place FCM tokens, Firebase installation credentials, Blink credentials, or Blink session data in this file.
 
-## Build and register
+## Pull and register
 
-Run these commands from the repository root. Set the Compose user IDs so the service can read the mode-`0600` Firebase file during registration and own its named-volume data:
+Run these commands from the setup directory containing `receiver/compose.yaml` and `.env`:
 
 ```sh
-cp .env.example .env
-chmod 600 .env
-export BLINK_PUSH_UID="$(id -u)"
-export BLINK_PUSH_GID="$(id -g)"
-docker compose -f receiver/compose.yaml build
+docker compose -f receiver/compose.yaml pull
 ```
 
 Create the independent FCM identity using the bundled values, or any overrides in `.env`:
