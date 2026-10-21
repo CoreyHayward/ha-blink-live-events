@@ -47,7 +47,7 @@ git clone https://github.com/CoreyHayward/blink-push-receiver.git
 cd blink-push-receiver
 ```
 
-Obtain the current Blink Android Firebase values from an authorized copy of the Blink app and place them in `receiver/firebase-config.json` using the required keys shown in the [receiver guide](receiver/README.md). This file is private and is intentionally excluded from Git and the Docker build context. Do not use an old sender ID as a substitute.
+The receiver includes the minimal Firebase client configuration currently used by the Blink Android app, so you do not need to extract values from the app. If Blink changes its Firebase project, override individual values in `.env`; see the [receiver guide](receiver/README.md). These are Firebase client identifiers, not user credentials or FCM registration tokens.
 
 ### 3. Register Blink and start listening
 
@@ -65,9 +65,7 @@ Set `BLINK_PUSH_HA_WEBHOOK_URL` in `.env` to the private URL from the integratio
 
 ```sh
 docker compose -f receiver/compose.yaml run --rm \
-  -v "$PWD/receiver/firebase-config.json:/run/secrets/firebase-config.json:ro" \
-  blink-push-receiver register-fcm \
-  --firebase-config /run/secrets/firebase-config.json
+  blink-push-receiver register-fcm
 
 docker compose -f receiver/compose.yaml run --rm -it blink-push-receiver register-blink
 ```

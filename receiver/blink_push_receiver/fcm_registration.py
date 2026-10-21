@@ -30,6 +30,15 @@ APP_VERSION_NAME = "60.0"
 APP_VERSION_CODE = 29834864
 FIS_URL = "https://firebaseinstallations.googleapis.com/v1"
 STATE_NAME = "fcm-state.json"
+DEFAULT_FIREBASE_CONFIG = (
+    Path(__file__).resolve().parent.parent / "firebase-config.default.json"
+)
+FIREBASE_CONFIG_ENV = {
+    "google_api_key": "BLINK_PUSH_FIREBASE_API_KEY",
+    "google_app_id": "BLINK_PUSH_FIREBASE_APP_ID",
+    "project_id": "BLINK_PUSH_FIREBASE_PROJECT_ID",
+    "gcm_defaultSenderId": "BLINK_PUSH_FIREBASE_SENDER_ID",
+}
 
 
 class RegistrationError(RuntimeError):
@@ -53,8 +62,14 @@ def _post_json(url: str, body: dict[str, Any], headers: dict[str, str]) -> dict[
     return result
 
 
-def _load_config(path: Path) -> dict[str, str]:
-    value = read_json(path)
+def _load_config(path: Path | None) -> dict[str, str]:
+    value = read_json(DEFAULT_FIREBASE_CONFIG)
+    if path is not None:
+        value.update(read_json(path))
+    for key, env_name in FIREBASE_CONFIG_ENV.items():
+        override = os.environ.get(env_name, "").strip()
+        if override:
+            value[key] = override
     required = ("google_api_key", "google_app_id", "project_id", "gcm_defaultSenderId")
     if any(not isinstance(value.get(key), str) or not value[key] for key in required):
         raise RegistrationError("firebase_config", "missing_required_field")
@@ -116,7 +131,7 @@ def _private_state(config: dict[str, str], fis: dict[str, Any], fid: str,
     }
 
 
-def register_fcm(firebase_config: Path, data_dir: Path) -> Path:
+def register_fcm(firebase_config: Path | None, data_dir: Path) -> Path:
     """Register an independent Android-app FCM identity and store it privately."""
     ensure_private_dir(data_dir)
     socket.setdefaulttimeout(25)

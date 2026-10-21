@@ -8,34 +8,23 @@ Read the repository [installation guide](../README.md) first. This file covers t
 
 - Linux host with Docker Engine and Docker Compose v2; ARM64 and AMD64 are supported by the Python receiver.
 - Outbound DNS and internet access, including TCP port 5228 for Google's MCS connection.
-- The current Blink Android Firebase configuration values, kept in a local file at `receiver/firebase-config.json`.
+- The receiver's bundled Blink Android Firebase client configuration, with optional overrides in `.env`.
 - A local-only Home Assistant webhook URL from the integration's Configure screen.
 
-The project does not include or redistribute Blink's Firebase application configuration. Obtain the values from a copy of the current Blink Android app through an authorized source and keep the resulting file private. The required JSON keys are:
+The receiver includes only the four Firebase client values it needs in `firebase-config.default.json`; you do not need to obtain the Blink APK or extract the values. These defaults match Blink Android 60.0 and may need updating if Blink changes its Firebase project. [Firebase describes its Android config as containing unique, non-secret identifiers](https://firebase.google.com/docs/android/google-services-plugin-and-file), and [Firebase API keys identify the project rather than authorize access](https://firebase.google.com/docs/projects/api-keys). The FCM token, Firebase installation credentials, and Blink session remain private per-installation state.
 
-```json
-{
-  "google_api_key": "...",
-  "google_app_id": "...",
-  "project_id": "...",
-  "gcm_defaultSenderId": "..."
-}
+If Blink changes its Firebase values, add only the changed settings to the ignored `.env` file:
+
+```dotenv
+BLINK_PUSH_FIREBASE_API_KEY=...
+BLINK_PUSH_FIREBASE_APP_ID=...
+BLINK_PUSH_FIREBASE_PROJECT_ID=...
+BLINK_PUSH_FIREBASE_SENDER_ID=...
 ```
 
-With JADX or an equivalent Android resource viewer, inspect the current Blink Android app resources and search for `google_api_key`, `google_app_id`, `project_id`, and `gcm_defaultSenderId`. Use the matching app values to create the JSON file above. For example, JADX's command-line decoder can unpack a local APK for searching:
+These environment variables override the corresponding bundled values when creating the FCM identity. Changing them does not modify an identity already stored in the receiver's persistent data volume. Alternatively, supply a JSON file with any values to override by mounting it read-only into the one-shot registration container and passing `--firebase-config /path/in/container`. The JSON keys are `google_api_key`, `google_app_id`, `project_id`, and `gcm_defaultSenderId`.
 
-```sh
-jadx -d /tmp/blink-android-decoded /path/to/your/blink.apk
-rg -n 'google_api_key|google_app_id|project_id|gcm_defaultSenderId' /tmp/blink-android-decoded
-```
-
-The project does not need the APK after you create the config file. Keep the APK and config outside public commits; `.gitignore` also excludes APK bundles and Firebase config files. Restrict the config file to your account:
-
-```sh
-chmod 600 receiver/firebase-config.json
-```
-
-Do not substitute a sender ID found in an old forum post. If Blink changes its Android app or Firebase project, registration values may need to be recovered again.
+The optional JSON file is merged over the bundled defaults, then any `.env` overrides are applied. Do not place FCM tokens, Firebase installation credentials, Blink credentials, or Blink session data in this file.
 
 ## Build and register
 
@@ -49,13 +38,10 @@ export BLINK_PUSH_GID="$(id -g)"
 docker compose -f receiver/compose.yaml build
 ```
 
-Create the independent FCM identity. The temporary bind mount exposes the Firebase configuration read-only to this one-shot container:
+Create the independent FCM identity using the bundled values, or any overrides in `.env`:
 
 ```sh
-docker compose -f receiver/compose.yaml run --rm \
-  -v "$PWD/receiver/firebase-config.json:/run/secrets/firebase-config.json:ro" \
-  blink-push-receiver register-fcm \
-  --firebase-config /run/secrets/firebase-config.json
+docker compose -f receiver/compose.yaml run --rm blink-push-receiver register-fcm
 ```
 
 In the integration's **Configure → View receiver URL** screen, copy the private URL into `.env` as `BLINK_PUSH_HA_WEBHOOK_URL`. Keep the URL private. It is a secret capability to publish Blink events to your HA instance.
@@ -79,7 +65,7 @@ docker compose -f receiver/compose.yaml logs -f blink-push-receiver
 
 ## Configuration and privacy
 
-- The Firebase file is ignored by Git and excluded from the Docker build context. Do not force-add it.
+- The bundled Firebase file contains public client identifiers only. The ignored `.env` may contain replacement values; keep it out of commits.
 - `.env` is ignored by Git. It contains the HA webhook URL; keep its permissions at `0600`.
 - Receiver state is stored in the private Docker volume `receiver_blink-push-data`. It contains FCM and Blink session tokens plus private raw message captures. Protect backups of this volume accordingly.
 - The HA payload is allowlisted and omits Blink account IDs, transaction IDs, FCM IDs, and raw push data.

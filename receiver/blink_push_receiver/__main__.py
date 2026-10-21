@@ -29,8 +29,8 @@ def main() -> int:
     register_fcm_parser.add_argument(
         "--firebase-config",
         type=Path,
-        required=True,
-        help="current Blink Android Firebase config JSON",
+        default=None,
+        help="optional JSON overrides for the bundled Blink Android Firebase config",
     )
     commands.add_parser("register-blink", help="sign in through Blink's hosted page and associate this receiver")
     listen_parser = commands.add_parser("listen", help="maintain the MCS connection and capture pushes")
@@ -41,7 +41,12 @@ def main() -> int:
     args.data_dir = args.data_dir.expanduser().resolve()
     try:
         if args.command == "register-fcm":
-            state_path = register_fcm(args.firebase_config.expanduser().resolve(), args.data_dir)
+            firebase_config = (
+                args.firebase_config.expanduser().resolve()
+                if args.firebase_config is not None
+                else None
+            )
+            state_path = register_fcm(firebase_config, args.data_dir)
             print(f"Independent Android FCM identity is ready; private state: {state_path}")
             return 0
         if args.command == "register-blink":
