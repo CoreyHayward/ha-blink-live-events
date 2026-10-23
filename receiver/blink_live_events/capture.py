@@ -14,7 +14,7 @@ from .state import atomic_json, ensure_private_dir, read_json
 
 
 EVENTS_NAME = "messages.ndjson"
-MOTION_TYPES = {"cloud_motion", "cam2sm_motion", "pir"}
+MOTION_TYPES = {"cloud_motion", "cam2sm_motion", "pir", "cv_motion"}
 
 
 def utc_now() -> str:
@@ -61,10 +61,9 @@ def classify(payload: dict[str, Any]) -> str:
     event_type = event_type_value.strip().lower() if isinstance(event_type_value, str) else ""
     if category == "media" and event_type == "button_press":
         return "doorbell_press"
-    # Blink doorbells report PIR motion under category=media, while other
-    # motion messages use category=motion. The event type identifies PIR as
-    # movement even when Blink's notification category is misleading.
-    if event_type in MOTION_TYPES and (category == "motion" or event_type == "pir"):
+    if event_type in MOTION_TYPES and (
+        category == "motion" or event_type in {"pir", "cv_motion"}
+    ):
         return "camera_motion"
     # Forward new Blink event types without a per-device or per-event allowlist.
     # The HA integration still sanitizes the payload before publishing it.
