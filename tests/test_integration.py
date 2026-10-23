@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+import json
+from types import SimpleNamespace
+
 import pytest
 from homeassistant.core import Event
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.blink_live_events.const import DOMAIN, EVENT_TYPE
+from receiver.blink_live_events.capture import MessageCapture
 from receiver.blink_live_events.ha_delivery import build_ha_event
+from receiver.vendor.fcm_receiver.messages_manual import AppData, DataMessageStanza
 
 WEBHOOK_ID = "blink-live-events-test-secret"
 
@@ -197,10 +202,19 @@ async def test_webhook_accepts_new_event_types_without_creating_native_entity(
     assert len(entities) == 2
 
 
+@pytest.mark.parametrize(
+    ("category", "event_type"),
+    [
+        ("motion", "cam2sm_motion"),
+        ("motion", "cloud_motion"),
+        ("media", "pir"),
+        ("media", "cv_motion"),
+    ],
+)
 async def test_receiver_generated_motion_event_reaches_ha(
-    hass, hass_client, config_entry
+    hass, hass_client, config_entry, tmp_path, category, event_type
 ):
-    """The receiver's real event shape is accepted by the HA contract."""
+    """Received motion pushes trigger the HA motion entity."""
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     await hass.async_block_till_done()
 
@@ -214,24 +228,24 @@ async def test_receiver_generated_motion_event_reaches_ha(
     hass.bus.async_listen(EVENT_TYPE, received.append)
     client = await hass_client()
 
-    receiver_payload = build_ha_event(
-        {
-            "kind": "fcm_message",
-            "received_at": "2026-01-01T12:00:00.250Z",
-            "provider_sent_ms": 1767268800200,
-            "classification": "camera_motion",
-            "fcm": {
-                "persistent_id": "private-fcm-id",
-                "id": "private-message-id",
-            },
-            "payload": {
-                "category": "motion",
-                "event_type": "cam2sm_motion",
-                "camera_name": "Test camera",
-                "unique_id": "private-blink-transaction-id",
-            },
-        }
+    capture = MessageCapture(tmp_path)
+    capture.state_path.write_text("{}", encoding="utf-8")
+    capture.handle(
+        DataMessageStanza(
+            id="private-message-id",
+            persistent_id="private-fcm-id",
+            sent=1767268800200,
+            category=category,
+            app_data=[
+                AppData("event_type", event_type),
+                AppData("camera_name", "Test camera"),
+                AppData("unique_id", "private-blink-transaction-id"),
+            ],
+        ),
+        SimpleNamespace(persistent_ids=[]),
     )
+    record = json.loads(capture.events_path.read_text().splitlines()[0])
+    receiver_payload = build_ha_event(record)
     response = await client.post(f"/api/webhook/{WEBHOOK_ID}", json=receiver_payload)
     await hass.async_block_till_done()
 
@@ -241,6 +255,8 @@ async def test_receiver_generated_motion_event_reaches_ha(
     assert received[0].data["source"] == DOMAIN
     assert received[0].data["event_id"] == receiver_payload["event_id"]
     assert received[0].data["classification"] == "camera_motion"
+    assert received[0].data["category"] == category
+    assert received[0].data["event_type"] == event_type
     assert received[0].data["ha_event_type"] == "motion"
     assert received[0].data["provider_timestamp"] == "2026-01-01T12:00:00.200Z"
     assert "private-fcm-id" not in str(received[0].data)
@@ -251,7 +267,7 @@ async def test_receiver_generated_motion_event_reaches_ha(
     assert motion_state is not None
     assert motion_state.attributes["event_type"] == "motion"
     assert motion_state.attributes["camera_name"] == "Test camera"
-    assert motion_state.attributes["blink_event_type"] == "cam2sm_motion"
+    assert motion_state.attributes["blink_event_type"] == event_type
 
 
 async def test_setup_generates_a_private_webhook_id(hass):

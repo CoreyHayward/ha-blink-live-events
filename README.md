@@ -136,7 +136,7 @@ The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anony
 
 ## Home Assistant event contract
 
-The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Doorbell PIR motion is normalized to `camera_motion` even though Blink reports it with `category=media` and `event_type=pir`. Any other push with a non-empty `event_type` is forwarded as `classification: other`, including events from untested camera models and event types. No per-camera model list is required. Events without an `event_type` are retained privately by the receiver but are not forwarded. The integration keeps native event entities for doorbell presses and motion; generic events remain available through the event bus for custom integrations and automations. Its `event_data` fields are:
+The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Known motion events map to `camera_motion`. This includes `pir` and `cv_motion` even when Blink reports `category=media`. Any other push with a non-empty `event_type` is forwarded as `classification: other`, including events from untested camera models and event types. No per-camera model list is required. Events without an `event_type` are retained privately by the receiver but are not forwarded. The integration keeps native event entities for doorbell presses and motion; generic events remain available through the event bus for custom integrations and automations. Its `event_data` fields are:
 
 | Field | Meaning |
 | --- | --- |
@@ -145,7 +145,7 @@ The integration fires `blink_live_events_event` once for every accepted push. Au
 | `event_id` | Stable SHA-256 delivery key used by the receiver to suppress duplicate delivery. |
 | `classification` | `doorbell_press`, `camera_motion`, or `other` for a new event type. |
 | `category` | Blink's notification category when present (`media` or `motion`). |
-| `event_type` | Blink's event type, such as `button_press`, `cam2sm_motion`, or doorbell motion's `pir`. |
+| `event_type` | Blink's event type, such as `button_press`, `cam2sm_motion`, `pir`, or `cv_motion`. |
 | `ha_event_type` | HA semantic type: `ring` for a doorbell or `motion` for a camera. |
 | `camera_name` | Blink camera name for motion events, when included by Blink. |
 | `provider_timestamp` | Provider send time in UTC, when present. |

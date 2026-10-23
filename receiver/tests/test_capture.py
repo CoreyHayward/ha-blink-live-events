@@ -11,6 +11,12 @@ from receiver.vendor.fcm_receiver.messages_manual import AppData, DataMessageSta
 
 
 class CaptureWakeTests(unittest.TestCase):
+    def test_cv_motion_is_classified_as_camera_motion(self) -> None:
+        self.assertEqual(
+            classify({"category": "media", "event_type": "cv_motion"}),
+            "camera_motion",
+        )
+
     def test_doorbell_pir_motion_is_classified_as_camera_motion(self) -> None:
         self.assertEqual(
             classify({"category": "media", "event_type": "pir"}),
