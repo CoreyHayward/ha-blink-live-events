@@ -100,7 +100,7 @@ The receiver image includes the minimal Firebase client configuration currently 
 
 ### 3. Register Blink and start listening
 
-Set `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest`; set `BLINK_LIVE_EVENTS_IMAGE_TAG` to a release such as `v1.0.0` to pin a version. Pull the image for your host architecture:
+Set `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest` (the stable release). Set `BLINK_LIVE_EVENTS_IMAGE_TAG` to `main` to test the newest validated main-branch image, or to a release such as `v0.1.1` to pin a version. Pull the image for your host architecture:
 
 ```sh
 docker compose -f receiver/compose.yaml pull
@@ -128,11 +128,13 @@ The listener waits for real Blink pushes. Test one doorbell press and a separate
 
 See [receiver/README.md](receiver/README.md) for registration details, security, and troubleshooting limitations.
 
-### Container image updates and local builds
+### Container images and releases
 
-The **Publish Docker image** job in the Validate workflow publishes multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry after validation passes on `main` and `v*` tags. On the first public release, run the Validate workflow manually on `main` to publish the initial image; later pushes and version tags publish automatically.
+After validation passes, pushes to `main` publish multi-architecture `linux/amd64` and `linux/arm64` images to GitHub Container Registry with the moving `main` tag and an immutable `sha-…` tag. Use `main` to try the newest code before a stable release.
 
-The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The default `latest` tag follows successful publications from `main` or a `v*` tag. To pin a version, set `BLINK_LIVE_EVENTS_IMAGE_TAG` in `.env` to a published `v*` tag. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
+Create a stable release from **Actions → Release → Run workflow** on the `main` branch. Choose a patch, minor, or major version bump. The workflow updates the Home Assistant integration's manifest version, runs receiver tests, Home Assistant tests, HACS validation, and hassfest, then commits the version update, creates a GitHub release with generated notes, and publishes the versioned image plus `latest`. The `latest` tag always points to the newest stable release.
+
+The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The Compose default is `latest`. To pin a stable version, set `BLINK_LIVE_EVENTS_IMAGE_TAG` in `.env` to a published `v*` tag. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
 
 ## Home Assistant event contract
 
