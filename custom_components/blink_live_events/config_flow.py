@@ -52,7 +52,9 @@ class BlinkLiveEventsOptionsFlow(config_entries.OptionsFlow):
     async def async_step_webhook(self, user_input: dict[str, Any] | None = None) -> Any:
         """Display the private webhook URL for receiver configuration."""
         if user_input is not None:
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(
+                title="", data=dict(self.config_entry.options)
+            )
 
         webhook_id = (
             self.config_entry.options.get("webhook_id")
