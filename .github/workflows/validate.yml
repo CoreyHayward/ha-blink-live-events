@@ -45,7 +45,7 @@ jobs:
           category: integration
 
   publish-image:
-    name: Publish Docker image
+    name: Publish main Docker image
     needs:
       - receiver-tests
       - home-assistant-integration
@@ -55,7 +55,7 @@ jobs:
       github.event.repository.private == false &&
       (
         (github.event_name == 'push' &&
-         (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))) ||
+         github.ref == 'refs/heads/main') ||
         (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
       )
     runs-on: ubuntu-24.04
@@ -85,9 +85,7 @@ jobs:
         with:
           images: ghcr.io/coreyhayward/ha-blink-live-events
           tags: |
-            type=raw,value=latest
-            type=ref,event=branch
-            type=ref,event=tag
+            type=raw,value=main
             type=sha,prefix=sha-
 
       - name: Build and publish multi-architecture image
