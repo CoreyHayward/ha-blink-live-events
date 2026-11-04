@@ -138,6 +138,8 @@ Create a stable release from **Actions → Release → Run workflow** on the `ma
 
 The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The Compose default is `latest`. To pin a stable version, set `BLINK_LIVE_EVENTS_IMAGE_TAG` in `.env` to a published `v*` tag. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
 
+GitHub shows the current [container image download totals](https://github.com/CoreyHayward/ha-blink-live-events/pkgs/container/ha-blink-live-events). These count image downloads, not unique installations; repeat pulls for updates, multiple devices, or automation can increase the total.
+
 ## Home Assistant event contract
 
 The integration fires `blink_live_events_event` once for every accepted push. Automations, scripts, custom integrations, and event listeners can subscribe to it. Known motion events map to `camera_motion`. This includes `pir` and `cv_motion` even when Blink reports `category=media`. Any other push with a non-empty `event_type` is forwarded as `classification: other`, including events from untested camera models and event types. No per-camera model list is required. Events without an `event_type` are retained privately by the receiver but are not forwarded. The integration keeps native event entities for doorbell presses and motion; generic events remain available through the event bus for custom integrations and automations. Its `event_data` fields are:
