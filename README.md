@@ -4,7 +4,7 @@ Receive Blink doorbell presses and camera motion in Home Assistant over Blink's 
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
-[![Open Blink Live Events in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=CoreyHayward&repository=ha-blink-live-events)
+[![Open Blink Live Events in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=CoreyHayward&repository=ha-blink-live-events) [![GHCR image pulls](https://ghcr-badge.elias.eu.org/shield/CoreyHayward/ha-blink-live-events/ha-blink-live-events)](https://github.com/CoreyHayward/ha-blink-live-events/pkgs/container/ha-blink-live-events)
 
 ## Quickstart
 
@@ -137,8 +137,6 @@ After validation passes, pushes to `main` publish multi-architecture `linux/amd6
 Create a stable release from **Actions → Release → Run workflow** on the `main` branch. Choose a patch, minor, or major version bump. The workflow updates the Home Assistant integration's manifest version, runs receiver tests, Home Assistant tests, HACS validation, and hassfest, then commits the version update, creates a GitHub release with generated notes, and publishes the versioned image plus `latest`. The `latest` tag always points to the newest stable release.
 
 The image is `ghcr.io/coreyhayward/ha-blink-live-events` and can be pulled anonymously; no GHCR login is needed. The Compose default is `latest`. To pin a stable version, set `BLINK_LIVE_EVENTS_IMAGE_TAG` in `.env` to a published `v*` tag. To build from source instead, clone the repository and run `docker build -f receiver/Dockerfile -t ghcr.io/coreyhayward/ha-blink-live-events:local .`, then set `BLINK_LIVE_EVENTS_IMAGE_TAG=local` in `.env`.
-
-GitHub shows the current [container image download totals](https://github.com/CoreyHayward/ha-blink-live-events/pkgs/container/ha-blink-live-events). These count image downloads, not unique installations; repeat pulls for updates, multiple devices, or automation can increase the total.
 
 ## Home Assistant event contract
 
