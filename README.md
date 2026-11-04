@@ -4,11 +4,13 @@ Receive Blink doorbell presses and camera motion in Home Assistant over Blink's 
 
 This is a community reverse-engineered project, not an official Blink, Amazon, Google, or Home Assistant product. Blink can change its app and cloud API without notice.
 
+[![Open Blink Live Events in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=CoreyHayward&repository=ha-blink-live-events) [![GHCR image pulls](https://ghcr-badge.elias.eu.org/shield/CoreyHayward/ha-blink-live-events/ha-blink-live-events)](https://github.com/CoreyHayward/ha-blink-live-events/pkgs/container/ha-blink-live-events)
+
 ## Quickstart
 
 You need Home Assistant 2026.10.0 or newer, plus a Linux host with Docker Engine, Docker Compose v2, `curl`, and outbound internet access. The receiver can run on a separate host from Home Assistant, but it needs network access to HA's internal URL.
 
-1. **Install the Home Assistant integration.** In HACS, add `https://github.com/CoreyHayward/ha-blink-live-events` as a custom repository with the **Integration** category, install **Blink Live Events**, and restart Home Assistant. Add the integration, open **Configure → View receiver URL**, and copy the private URL. For a manual install, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA. If HA cannot show a receiver URL, configure its internal URL in **Settings → System → Network** first.
+1. **Install the Home Assistant integration.** In HACS, search for **Blink Live Events**, open the repository, select **Download**, and restart Home Assistant. You can also use the HACS button above. If it is not yet visible in your catalog, add `https://github.com/CoreyHayward/ha-blink-live-events` as a custom **Integration** repository. Add the integration, open **Configure → View receiver URL**, and copy the private URL. For a manual install, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA. If HA cannot show a receiver URL, configure its internal URL in **Settings → System → Network** first.
 
 2. **Prepare the receiver.** On your Linux Docker host, download the Compose file and environment template:
 
@@ -77,7 +79,7 @@ The custom integration requires Home Assistant 2026.10.0 or newer.
 
 ### 1. Install the Home Assistant integration
 
-In HACS, add this repository as a custom **Integration** repository, install **Blink Live Events**, and restart Home Assistant. To install manually, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
+In HACS, search for **Blink Live Events**, open the repository, select **Download**, and restart Home Assistant. If it is not yet visible in your catalog, add `https://github.com/CoreyHayward/ha-blink-live-events` as a custom **Integration** repository. To install manually, copy `custom_components/blink_live_events` into `<config>/custom_components/` and restart HA.
 
 In **Settings → Devices & services → Add integration**, add **Blink Live Events**. Open its **Configure** page and select **View receiver URL**. Copy this private URL for the receiver setup. If the URL is exposed, use **Rotate receiver URL** and update the receiver's `.env` file.
 
@@ -100,7 +102,7 @@ The receiver image includes the minimal Firebase client configuration currently 
 
 ### 3. Register Blink and start listening
 
-Set `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest` (the stable release). Set `BLINK_LIVE_EVENTS_IMAGE_TAG` to `main` to test the newest validated main-branch image, or to a release such as `v0.1.1` to pin a version. Pull the image for your host architecture:
+Set `BLINK_LIVE_EVENTS_HA_WEBHOOK_URL` in `.env` to the private URL from the integration's Configure screen. The default image tag is `latest` (the stable release). Set `BLINK_LIVE_EVENTS_IMAGE_TAG` to `main` to test the newest validated main-branch image, or to a release such as `v0.1.2` to pin a version. Pull the image for your host architecture:
 
 ```sh
 docker compose -f receiver/compose.yaml pull
