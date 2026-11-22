@@ -176,6 +176,71 @@ class HostedOAuthTests(unittest.TestCase):
         self.assertEqual(update_call.kwargs["body"]["notification_key"], "test-fcm-token")
         self.assertEqual(update_call.kwargs["headers"]["Client-Id"], "456")
 
+    def test_hardware_id_header_uses_authenticated_account_client(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            (data_dir / "fcm-state.json").write_text(json.dumps({
+                "status": "ready", "fcm_token": "test-fcm-token",
+            }))
+            (data_dir / "blink-auth.json").write_text(json.dumps({
+                "access_token": "test-access-token", "expires_at": int(time.time()) + 3600,
+                "tier": "test-tier", "account_id": "123",
+            }))
+            with patch.object(blink_account, "_request", side_effect=[
+                (200, {"Client-Id": "test-hardware-uuid"}, b"{}"),
+                (200, {}, b'{"account_id":123,"client_id":456}'),
+                (200, {}, b"{}"),
+            ]) as request:
+                associate_fcm_token(data_dir)
+            self.assertEqual(read_json(data_dir / "blink-auth.json")["client_id"], "456")
+            self.assertEqual(request.call_args_list[1].args[1],
+                             "https://rest-test-tier.immedia-semi.com/api/v2/users/info")
+            self.assertEqual(request.call_args_list[2].args[1],
+                             "https://rest-test-tier.immedia-semi.com/clients/456/update")
+            self.assertEqual(request.call_args_list[2].kwargs["headers"]["Client-Id"], "456")
+
+    def test_account_info_rejects_mismatched_or_invalid_client_before_update(self) -> None:
+        for info in (
+            {"account_id": 999, "client_id": 456},
+            {"account_id": 123, "client_id": True},
+            {"account_id": 123, "client_id": "hardware-uuid"},
+            {"account_id": 123, "client_id": 0},
+            {"account_id": 123},
+        ):
+            with self.subTest(info=info), tempfile.TemporaryDirectory() as directory:
+                data_dir = Path(directory)
+                (data_dir / "fcm-state.json").write_text(json.dumps({
+                    "status": "ready", "fcm_token": "test-fcm-token",
+                }))
+                (data_dir / "blink-auth.json").write_text(json.dumps({
+                    "access_token": "test-access-token", "expires_at": int(time.time()) + 3600,
+                    "tier": "test-tier", "account_id": "123",
+                }))
+                with patch.object(blink_account, "_request", side_effect=[
+                    (200, {"Client-Id": "hardware-uuid"}, b"{}"),
+                    (200, {}, json.dumps(info).encode()),
+                ]) as request:
+                    with self.assertRaises(BlinkAccountError):
+                        associate_fcm_token(data_dir)
+                self.assertEqual(request.call_count, 2)
+
+    def test_account_info_failure_stops_client_update(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_dir = Path(directory)
+            (data_dir / "fcm-state.json").write_text(json.dumps({
+                "status": "ready", "fcm_token": "test-fcm-token",
+            }))
+            (data_dir / "blink-auth.json").write_text(json.dumps({
+                "access_token": "test-access-token", "expires_at": int(time.time()) + 3600,
+                "tier": "test-tier", "account_id": "123",
+            }))
+            with patch.object(blink_account, "_request", side_effect=[
+                (200, {}, b"{}"), (503, {}, b""),
+            ]) as request:
+                with self.assertRaisesRegex(BlinkAccountError, "account_info_http_503"):
+                    associate_fcm_token(data_dir)
+            self.assertEqual(request.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
