@@ -286,8 +286,22 @@ def _discover_account(state: dict[str, Any], data_dir: Path) -> dict[str, Any]:
     if status != 200:
         raise BlinkAccountError("client_discovery", f"http_{status}")
     client_id = response_headers.get("Client-Id")
-    if not client_id:
-        raise BlinkAccountError("client_discovery", "client_id_header_missing")
+    if not client_id or not client_id.isascii() or not client_id.isdecimal() or int(client_id) <= 0:
+        # Some homescreen responses identify the hardware UUID, not the Blink client.
+        status, _, response = _request(
+            "GET", f"{rest_root}/v2/users/info", headers=headers
+        )
+        if status != 200:
+            raise BlinkAccountError("client_discovery", f"account_info_http_{status}")
+        account_info = _json_object(response, "client_discovery")
+        if str(account_info.get("account_id", "")) != str(account_id):
+            raise BlinkAccountError("client_discovery", "account_mismatch")
+        client_id = account_info.get("client_id")
+        if isinstance(client_id, bool) or not isinstance(client_id, (int, str)):
+            raise BlinkAccountError("client_discovery", "invalid_client_id")
+        client_id = str(client_id)
+        if not client_id.isascii() or not client_id.isdecimal() or int(client_id) <= 0:
+            raise BlinkAccountError("client_discovery", "invalid_client_id")
 
     state.update({"tier": tier, "account_id": str(account_id), "client_id": client_id})
     return state
