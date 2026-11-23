@@ -58,6 +58,11 @@ def normalize_event(body: dict[str, Any]) -> dict[str, Any] | None:
         ) is not None:
             normalized[key] = value
 
+    if event_type == "smart_video_description":
+        for key, max_length in (("title", 160), ("description", 1024)):
+            if (value := _optional_string(body.get(key), max_length=max_length)) is not None:
+                normalized[key] = value
+
     if classification == CLASSIFICATION_DOORBELL:
         normalized["ha_event_type"] = "ring"
     elif classification == CLASSIFICATION_MOTION:
