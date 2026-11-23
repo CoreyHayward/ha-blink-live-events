@@ -71,7 +71,7 @@ flowchart LR
     H -->|HA event bus| X[Custom integrations, scripts, and other consumers]
 ```
 
-The receiver holds its own FCM identity and Blink client session. Home Assistant never receives Blink account credentials. The receiver forwards only the event metadata needed for automations; private FCM IDs, Blink account IDs, transaction IDs, and raw push payloads stay in the receiver's private data volume.
+The receiver holds its own FCM identity and Blink client session. Home Assistant never receives Blink account credentials. The receiver forwards event metadata and any Blink video description title and text to Home Assistant. Private FCM IDs, Blink account IDs, transaction IDs, and raw push payloads stay in the receiver's private data volume.
 
 ## Installation
 
@@ -155,6 +155,8 @@ The integration fires `blink_live_events_event` once for every accepted push. Au
 | `provider_timestamp` | Provider send time in UTC, when present. |
 | `created_at` | Blink event timestamp, when present. |
 | `received_at` | Receiver UTC receipt timestamp. |
+| `title` | Blink’s notification title for `smart_video_description` events, when present, up to 160 characters. |
+| `description` | Blink’s description text for `smart_video_description` events, when present, up to 1,024 characters. |
 
 Optional fields may be absent if the Blink push does not include them. For `other`, the minimum accepted fields are `event_id` and a non-empty `event_type`. The `event_type` field is Blink's raw event type; `ha_event_type` is present only for recognized doorbell and motion events. Event entity states use `ring` and `motion`, and their attributes contain sanitized metadata (with Blink's raw type exposed as `blink_event_type`).
 

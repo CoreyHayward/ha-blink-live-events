@@ -40,7 +40,7 @@ def _provider_timestamp(provider_sent_ms: Any) -> str | None:
 
 def build_ha_event(record: dict[str, Any]) -> dict[str, Any]:
     payload = record.get("payload") or {}
-    return {
+    event = {
         "schema_version": 1,
         "source": "blink_live_events",
         "event_id": delivery_key(record),
@@ -52,6 +52,16 @@ def build_ha_event(record: dict[str, Any]) -> dict[str, Any]:
         "created_at": payload.get("created_at"),
         "received_at": record.get("received_at"),
     }
+
+    if event["event_type"] == "smart_video_description":
+        for source, field, max_length in (
+            ("title", "title", 160),
+            ("message", "description", 1024),
+        ):
+            value = payload.get(source)
+            if isinstance(value, str) and (value := value.strip()):
+                event[field] = value[:max_length]
+    return event
 
 
 class HomeAssistantWebhook:

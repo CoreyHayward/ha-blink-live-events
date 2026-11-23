@@ -60,6 +60,8 @@ async def test_webhook_publishes_sanitized_event_and_updates_entities(
             "event_type": "button_press",
             "provider_timestamp": "2026-01-01T12:00:00.000Z",
             "received_at": "2026-01-01T12:00:00.040Z",
+            "title": "Unrelated title",
+            "description": "Unrelated text",
             "account_id": "must-not-be-forwarded",
             "raw_payload": {"private": "must-not-be-forwarded"},
         },
@@ -324,3 +326,55 @@ async def test_options_show_and_rotate_receiver_url(hass, hass_client, config_en
         },
     )
     assert response.status == 204
+
+
+@pytest.mark.parametrize(
+    ("event_type", "message", "title", "expected"),
+    [
+        (
+            "smart_video_description",
+            "A person is walking on the porch.",
+            "Person at Doorbell",
+            {
+                "description": "A person is walking on the porch.",
+                "title": "Person at Doorbell",
+            },
+        ),
+        ("smart_video_description", None, None, {}),
+        ("smart_video_description", None, "Title only", {"title": "Title only"}),
+        ("smart_video_description", "   ", "   ", {}),
+        ("smart_video_description", {"private": "unexpected value"}, 42, {}),
+        (
+            "smart_video_description",
+            "x" * 1025,
+            "t" * 161,
+            {"description": "x" * 1024, "title": "t" * 160},
+        ),
+        ("new_sensor_activity", "Unrelated text", "Unrelated title", {}),
+    ],
+)
+async def test_receiver_video_description_fields_reach_ha(
+    hass, hass_client, config_entry, event_type, message, title, expected
+):
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    received: list[Event] = []
+    hass.bus.async_listen(EVENT_TYPE, received.append)
+
+    payload = {"event_type": event_type, "camera_name": "Doorbell"}
+    if message is not None:
+        payload["message"] = message
+    if title is not None:
+        payload["title"] = title
+    event = build_ha_event({"classification": "other", "payload": payload})
+    client = await hass_client()
+    response = await client.post(f"/api/webhook/{WEBHOOK_ID}", json=event)
+    await hass.async_block_till_done()
+
+    assert response.status == 204
+    assert len(received) == 1
+    assert received[0].data["event_type"] == event_type
+    fields = {"title", "description"}
+    assert {key: event[key] for key in fields & event.keys()} == expected
+    delivered = received[0].data
+    assert {key: delivered[key] for key in fields & delivered.keys()} == expected
+    assert "message" not in received[0].data
